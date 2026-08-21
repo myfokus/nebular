@@ -132,14 +132,33 @@ Together these fix five `datepicker.spec.ts` regressions and one in `window.serv
 ## Releasing
 
 Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC), so there
-is no long-lived `NPM_TOKEN` in this repo. One-time setup on npmjs, by a human with owner rights on
-the `@myfokus` org:
+is no long-lived `NPM_TOKEN` in this repo.
+
+### One-time bootstrap
+
+npm attaches a trusted publisher to an **existing package**, and the setting is per package — there
+is no organisation- or scope-level equivalent, and "each package can only have one trusted publisher
+configured at a time". So the three packages have to exist on npmjs before OIDC can take over, which
+makes the very first publish a manual one. Done once, by a human with publish rights on the org:
 
 1. Create the `@myfokus` organisation on npmjs.
-2. For each of the three packages, add a trusted publisher: repository `myfokus/nebular`, workflow
-   `.github/workflows/publish.yml`.
+2. On a machine logged in to npm (`npm login`), from the repo root:
 
-To cut a release:
+   ```bash
+   npm ci && npm run build:myfokus && npm run publish:myfokus
+   ```
+
+   `tools/publish-myfokus.sh` passes `--access=public`, which a first publish under a new scope
+   needs, and publishes theme first because the other two peer on it.
+3. For each of `@myfokus/nebular-theme`, `@myfokus/nebular-eva-icons` and
+   `@myfokus/nebular-date-fns`, open the package's settings on npmjs and add a trusted publisher:
+   repository `myfokus/nebular`, workflow `publish.yml`. The workflow filename must match exactly.
+
+Every release after that runs through the workflow. Note that npm does not validate a trusted
+publisher configuration when you save it — a mismatch only shows up at publish time, and it surfaces
+as a misleading `E404 Not Found` rather than an auth error.
+
+### Cutting a release
 
 1. Bump `version` in all three `src/framework/*/package.json` files, and the
    `@myfokus/nebular-theme` peer range in `date-fns` and `eva-icons`.

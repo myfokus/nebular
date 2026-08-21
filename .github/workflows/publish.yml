@@ -19,8 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          # Trusted publishing needs Node >= 22.14.0; .nvmrc pins 22.22.3.
           node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
