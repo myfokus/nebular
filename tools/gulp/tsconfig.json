@@ -2,6 +2,8 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "noUnusedParameters": true,
+    "strict": false,
+    "noImplicitAny": false,
     "lib": [
       "es2017"
     ],
@@ -14,8 +16,7 @@
     ],
     "types": [
       "node"
-    ],
-    "baseUrl": "."
+    ]
   },
   "files": [
     "gulpfile.ts"

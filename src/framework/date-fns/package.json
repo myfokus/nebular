@@ -1,17 +1,17 @@
 {
-  "name": "@nebular/date-fns",
-  "version": "17.0.0",
-  "description": "@nebular/date-fns",
+  "name": "@myfokus/nebular-date-fns",
+  "version": "17.1.0",
+  "description": "Fork of @nebular/date-fns, compatible with Angular 22, @angular/cdk 22 and date-fns 3/4",
   "author": "akveo",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akveo/nebular.git"
+    "url": "git+https://github.com/myfokus/nebular.git"
   },
   "bugs": {
-    "url": "https://github.com/akveo/nebular/issues"
+    "url": "https://github.com/myfokus/nebular/issues"
   },
-  "homepage": "https://github.com/akveo/nebular#readme",
+  "homepage": "https://github.com/myfokus/nebular#readme",
   "keywords": [
     "angular",
     "typescript",
@@ -21,8 +21,8 @@
     "nebular"
   ],
   "peerDependencies": {
-    "@nebular/theme": "17.0.0",
-    "date-fns": "^2.0.0"
+    "@myfokus/nebular-theme": "^17.1.0",
+    "date-fns": "^3.0.0 || ^4.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

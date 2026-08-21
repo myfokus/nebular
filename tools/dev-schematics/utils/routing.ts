@@ -72,7 +72,7 @@ function getImports(moduleDecorator: ts.ObjectLiteralExpression): ts.PropertyAss
 function getRouterModuleCall(importsNode: ts.PropertyAssignment): ts.CallExpression {
   const routerModuleCall = (importsNode.initializer as ts.ArrayLiteralExpression).elements
     .filter((el) => el.kind === ts.SyntaxKind.CallExpression)
-    .find((el: ts.CallExpression) => el.expression.getText() === 'RouterModule.forChild') as ts.CallExpression;
+    .find((el) => (el as ts.CallExpression).expression.getText() === 'RouterModule.forChild') as ts.CallExpression;
   if (routerModuleCall == null) {
     throw new SchematicsException(`Can't find RouterModule.forChild call in module imports.`);
   }

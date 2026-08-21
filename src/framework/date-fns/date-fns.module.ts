@@ -6,7 +6,7 @@
 
 import { ModuleWithProviders, NgModule } from '@angular/core';
 
-import { NB_DATE_SERVICE_OPTIONS, NbDateService } from '@nebular/theme';
+import { NB_DATE_SERVICE_OPTIONS, NbDateService } from '@myfokus/nebular-theme';
 import { NbDateFnsOptions, NbDateFnsDateService } from './services/date-fns-date.service';
 
 const dateFnsServiceProvider = { provide: NbDateService, useClass: NbDateFnsDateService };

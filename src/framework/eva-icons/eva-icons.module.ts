@@ -5,7 +5,7 @@
  */
 
 import { NgModule } from '@angular/core';
-import { NbIconLibraries, NbSvgIcon, NbIcons } from '@nebular/theme';
+import { NbIconLibraries, NbSvgIcon, NbIcons } from '@myfokus/nebular-theme';
 import { icons } from 'eva-icons';
 
 interface NbOriginalEvaIcon {

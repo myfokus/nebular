@@ -1,4 +1,187 @@
+# myfokus/nebular
+
+This is a **compatibility fork** of [akveo/nebular](https://github.com/akveo/nebular), forked at the
+`v17.0.0` release. Upstream is MIT licensed; `LICENSE.txt` and the original copyright headers are
+kept intact.
+
+It exists for one reason: `@nebular/theme@17.0.0` is the newest published Nebular and still declares
+`@angular/*` and `@angular/cdk` peers of `^21.0.0`. Both Fokus dashboards run Angular 22, which only
+worked because pnpm does not enforce peer ranges and because `@angular/cdk` was deliberately pinned a
+major behind the framework. That blocked Angular 23. This fork retargets the packages we actually use
+at Angular 22 / CDK 22 and nothing else.
+
+**It is not a redesign, and it is not a general-purpose Nebular.** Do not add features here.
+
+## What we publish
+
+| Fork package | Upstream package | Consumed by |
+| --- | --- | --- |
+| `@myfokus/nebular-theme` | `@nebular/theme` | dok-dashboard, dok-admin-dashboard |
+| `@myfokus/nebular-eva-icons` | `@nebular/eva-icons` | dok-dashboard, dok-admin-dashboard |
+| `@myfokus/nebular-date-fns` | `@nebular/date-fns` | dok-dashboard |
+
+Everything else in `src/framework` (`auth`, `moment`, `security`, `firebase-auth`, `bootstrap`,
+`icons`) is **left untouched at its Angular 21 state and is not built, tested or published**. It is
+kept only so the diff against upstream stays small. Do not assume it compiles.
+
+Versioning follows the upstream base: the fork is `17.1.0`, meaning "upstream 17.0.0 plus our
+compatibility changes". Keeping the major aligned with upstream is what makes "which release is this
+forked from?" answerable at a glance.
+
+## How this fork diverges from upstream
+
+### Toolchain
+
+- Root `package.json`: all `@angular/*`, `@angular-devkit/*`, `@angular/cli`, `ng-packagr` and
+  `angular-eslint` moved `^21.0.0` → `^22.0.0`; `typescript` `~5.9.2` → `~6.0.3` (Angular 22 requires
+  `>=6.0 <6.1`); `date-fns` `^2.0.0` → `^4.1.0`; `@types/node` bumped; `@types/fancy-log` added.
+- `.nvmrc`: `20.19.5` → `22.22.3`. Angular 22 requires Node `^22.22.3 || ^24.15.0 || >=26.0.0`.
+- TypeScript 6.0 turns `strict` on by default and deprecates `baseUrl` / `moduleResolution: node10`.
+  The build-tooling configs (`tools/gulp`, `tools/dev-schematics`, `theme/tsconfig.schematics.json`)
+  pin the pre-6.0 behaviour explicitly rather than have the tooling rewritten. The root `tsconfig.json`
+  drops `baseUrl` outright, so its `paths` entries had to become relative (`./src/...`).
+
+### Package identity
+
+- The three published packages are renamed to the `@myfokus` scope, their `@angular/*` and
+  `@angular/cdk` peers retargeted to `^22.0.0`, and `repository`/`bugs`/`homepage` repointed here.
+  `author` stays `akveo` — they wrote it.
+- `@myfokus/nebular-date-fns` peers on `date-fns` `^3.0.0 || ^4.0.0`, not `^2.0.0`. The upstream
+  package imported `date-fns` submodules as **default** exports (`import { default as parse } from
+  'date-fns/parse'`), which date-fns 3 removed. Against the `date-fns@4` the dashboards actually
+  install, upstream's build is broken. Those imports are now named. date-fns 2 is consequently no
+  longer supported by this package.
+- `tsconfig.json` gains a `@myfokus/nebular-*` path mapping alongside the upstream `@nebular/*` one,
+  so the internal cross-package imports resolve. Only `date-fns` and `eva-icons` were repointed at
+  the new scope; the unmaintained packages still import `@nebular/*`.
+
+### CDK 21 → 22 source changes
+
+CDK 22 moved its components to `inject()`-based DI, so a whole family of Nebular classes that
+extended a CDK class and forwarded constructor arguments now call a zero-argument `super()`:
+
+- `cdk/adapter/viewport-ruler-adapter.ts`, `cdk/adapter/scroll-dispatcher-adapter.ts` — `super()`;
+  the parameters that existed only to be forwarded are gone. `NB_DOCUMENT` is `useExisting: DOCUMENT`,
+  which is exactly what CDK now injects itself, so nothing changes behaviourally.
+- `cdk/adapter/block-scroll-strategy-adapter.ts` — `NbScrollStrategyOptions` calls `super()`.
+  `BlockScrollStrategy` itself still takes its two arguments and is untouched.
+- `cdk/table/cell.ts`, `cdk/table/table.module.ts`, `tree-grid/tree-grid-def.component.ts`,
+  `tree-grid/tree-grid.component.ts` — same treatment. `NbTable` no longer needs a constructor at all.
+- `cdk/a11y/focus-trap.ts` — the opposite direction: CDK 22's `FocusTrap` constructor *gained* an
+  `Injector` parameter, so `NbFocusTrap` takes and forwards one and `NbFocusTrapFactoryService`
+  injects it.
+
+Two consequences of that move needed explicit repair, because CDK used to receive Nebular's adapters
+as constructor arguments and now looks them up in the injector instead:
+
+- `cdk/adapter/adapter.module.ts` gains `{ provide: ViewportRuler, useExisting: NbViewportRulerAdapter }`.
+  Without it the scroll strategies measure the window instead of the `nb-layout` scroll container.
+- `NB_TABLE_PROVIDERS` now carries the same mapping for `CdkTable`, which previously got the adapter
+  through its constructor.
+
+`NB_VIEW_REPEATER_STRATEGY` is **removed** — CDK 22 deleted `_VIEW_REPEATER_STRATEGY` and no longer
+accepts an injected view-repeater strategy. It only ever supplied `_DisposeViewRepeaterStrategy`,
+which is CDK's default anyway, so behaviour is unchanged. This is the one intentional public API
+break in the fork.
+
+### Angular 22 source changes
+
+- `tree-grid/tree-grid-def.component.ts` — `ngOnChanges(changes: SimpleChanges)` →
+  `SimpleChanges<this>`; Angular 22 made the type generic and the base signature is now narrower.
+- `calendar/calendar-range.component.ts` — `monthCellComponent` was declared as an `@Input()` *and*
+  bound again through the aliased `@Input('monthCellComponent') set _monthCellComponent` setter.
+  Angular 22's new NG1054 diagnostic rejects the duplicate binding. The plain `@Input()` was dropped,
+  which makes the property consistent with its `dayCellComponent` and `yearCellComponent` siblings —
+  neither of those carried one. Upstream bug, surfaced by the compiler.
+
+### CI and release
+
+- `.github/workflows/pr-check.yml` is **replaced**. Upstream's version builds the docs site, the
+  playground and a BrowserStack matrix using akveo's own hardcoded BrowserStack credentials, which
+  are not ours to use. Ours builds and tests the three packages. **Resolve rebase conflicts in this
+  file in favour of our version.**
+- `.github/workflows/deploy-docs.yml` is **deleted** — it publishes the Nebular docs site to
+  gh-pages, which this fork has no business doing.
+- `.github/workflows/publish.yml` and `tools/publish-myfokus.sh` are new (see below).
+- New npm scripts, all prefixed `myfokus` so a rebase makes the divergence obvious:
+  `build:myfokus`, `build:myfokus-sass`, `test:myfokus`, `publish:myfokus`.
+
+## Releasing
+
+Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC), so there
+is no long-lived `NPM_TOKEN` in this repo. One-time setup on npmjs, by a human with owner rights on
+the `@myfokus` org:
+
+1. Create the `@myfokus` organisation on npmjs.
+2. For each of the three packages, add a trusted publisher: repository `myfokus/nebular`, workflow
+   `.github/workflows/publish.yml`.
+
+To cut a release:
+
+1. Bump `version` in all three `src/framework/*/package.json` files, and the
+   `@myfokus/nebular-theme` peer range in `date-fns` and `eva-icons`.
+2. Tag it `myfokus-v<version>` and push the tag.
+
+The tag prefix is `myfokus-v`, not `v`, so it can never collide with the upstream release tags this
+fork inherited (`v1.0.0` … `v17.0.0`) or with any that arrive in a future rebase. The workflow
+verifies the tag matches the theme package version before publishing, then publishes theme first
+because the other two peer on it.
+
+If trusted publishing is ever not an option, the fallback is an automation token in an Actions secret
+and `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}` on the publish step — a two-line change to
+`publish.yml`.
+
+## Rebasing onto a future upstream release
+
+If akveo ever ships an Angular 22+ release, most of this fork should evaporate.
+
+```bash
+git remote add upstream https://github.com/akveo/nebular.git   # once
+git fetch upstream --tags
+git rebase v18.0.0                                             # or whatever the new tag is
+```
+
+Then, in order:
+
+1. **Drop what upstream fixed.** Every CDK/Angular source change listed above exists only because
+   upstream was on 21. If the new release did the same work, take upstream's version wholesale.
+2. **Keep the package identity changes.** Scope, version, peer ranges, `repository`, the
+   `@myfokus/nebular-*` path mapping, and the date-fns named imports are ours regardless of the
+   upstream version — unless upstream also fixed date-fns 3/4, in which case take theirs.
+3. **Keep our CI and release files.** `pr-check.yml` will conflict; resolve in favour of ours.
+   `deploy-docs.yml` will come back; delete it again. `publish.yml`, `tools/publish-myfokus.sh` and
+   the `myfokus`-prefixed npm scripts are ours and will not conflict.
+4. **Re-check the divergence list above** and rewrite it to match what actually remains.
+5. Run `npm ci && npm run build:myfokus && npm run test:myfokus`, then verify against the dashboards
+   before publishing.
+
+If upstream is still dead and you are bumping Angular again, the CDK-inheritance sites listed above
+are where breakage lands; everything else has been stable.
+
+## Test suite state
+
+`npm run test:myfokus` is **not green, and was not green upstream either.** Measured on this
+hardware, `ng test theme`:
+
+| | failing | passing |
+| --- | --- | --- |
+| upstream `v17.0.0` on Angular 21 | 162 | 654 |
+| this fork on Angular 22 / CDK 22 | 107 | 708 |
+
+The fork fixes 46 specs that upstream fails and does not regress the vast majority. Six specs do
+regress — five in `datepicker.spec.ts` and one in `window.service.spec.ts` — all traced to
+imperatively-assigned inputs on portal-attached components no longer taking effect under Angular 22
+(`NbDatepickerComponent.patchWithInputs`). That is upstream code this fork did not modify. **This is
+open and tracked in DOK-2520.** Verify date pickers by hand until it is closed.
+
+Because the suite is red on both sides, treat the *diff* in failures as the gate, not the absolute
+count. Capture a baseline before and after any change.
+
+---
+
 # Nebular [<img src="https://i.imgur.com/oMcxwZ0.png" alt="Eva Design System" height="20px" />](https://eva.design?utm_campaign=eva_design%20-%20home%20-%20nebular%20github%20readme&utm_source=nebular&utm_medium=referral&utm_content=github_readme_hero_pic) [![npm](https://img.shields.io/npm/l/@nebular/theme.svg)]() [![npm](https://img.shields.io/npm/dt/@nebular/theme.svg)](https://www.npmjs.com/package/@nebular/theme) [![Codecov](https://img.shields.io/codecov/c/github/akveo/nebular/master.svg?style=flat-square)](https://codecov.io/gh/akveo/nebular/branch/master)
+
+> Everything below this line is upstream's original README, kept for reference.
 
 [Documentation](https://akveo.github.io/nebular/docs/getting-started/what-is-nebular?utm_campaign=nebular%20-%20home%20-%20nebular%20github%20readme&utm_source=nebular&utm_medium=referral&utm_content=documentation) | [Stackblitz Template](https://stackblitz.com/github/akveo/nebular-seed) | [Angular templates](https://www.akveo.com/templates?utm_campaign=services%20-%20github%20-%20templates&utm_source=nebular&utm_medium=referral&utm_content=github%20readme%20top%20angular%20templates%20link)
 
