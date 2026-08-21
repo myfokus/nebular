@@ -295,6 +295,9 @@ export abstract class NbBasePicker<D, T, P> extends NbDatepicker<T, D> {
     this.writeQueue();
     this.patchWithInputs();
     this.pickerRef.changeDetectorRef.markForCheck();
+    // The picker has already been rendered once by the attach above, with none of the inputs set.
+    // Render again now so callers reading the picker straight after show() see the patched state.
+    this.pickerRef.changeDetectorRef.detectChanges();
   }
 
   protected createPositionStrategy(): NbAdjustableConnectedPositionStrategy {
@@ -341,21 +344,34 @@ export abstract class NbBasePicker<D, T, P> extends NbDatepicker<T, D> {
     });
   }
 
+  /**
+   * Angular 22 runs the picker's first change detection while the portal is still attaching, which
+   * is before any of these values are known. A plain property assignment is not recorded as an input
+   * change, so the calendar kept showing whatever that first pass saw - today's month, no selection -
+   * until some later, unrelated change detection run happened to refresh it. setInput records the
+   * change and marks the view, so the next render reflects it.
+   */
+  protected setPickerInput(name: string, value: any) {
+    if (this.pickerRef) {
+      this.pickerRef.setInput(name, value);
+    }
+  }
+
   protected patchWithInputs() {
-    this.picker.boundingMonth = this.boundingMonth;
-    this.picker.startView = this.startView;
-    this.picker.min = this.min;
-    this.picker.max = this.max;
-    this.picker.filter = this.filter;
-    this.picker._cellComponent = this.dayCellComponent;
-    this.picker._monthCellComponent = this.monthCellComponent;
-    this.picker._yearCellComponent = this.yearCellComponent;
-    this.picker.size = this.size;
-    this.picker.showNavigation = this.showNavigation;
-    this.picker.visibleDate = this.visibleDate;
-    this.picker.showWeekNumber = this.showWeekNumber;
-    this.picker.weekNumberSymbol = this.weekNumberSymbol;
-    this.picker.firstDayOfWeek = this.firstDayOfWeek;
+    this.setPickerInput('boundingMonth', this.boundingMonth);
+    this.setPickerInput('startView', this.startView);
+    this.setPickerInput('min', this.min);
+    this.setPickerInput('max', this.max);
+    this.setPickerInput('filter', this.filter);
+    this.setPickerInput('dayCellComponent', this.dayCellComponent);
+    this.setPickerInput('monthCellComponent', this.monthCellComponent);
+    this.setPickerInput('yearCellComponent', this.yearCellComponent);
+    this.setPickerInput('size', this.size);
+    this.setPickerInput('showNavigation', this.showNavigation);
+    this.setPickerInput('visibleDate', this.visibleDate);
+    this.setPickerInput('showWeekNumber', this.showWeekNumber);
+    this.setPickerInput('weekNumberSymbol', this.weekNumberSymbol);
+    this.setPickerInput('firstDayOfWeek', this.firstDayOfWeek);
   }
 
   protected checkFormat() {
@@ -576,8 +592,8 @@ export class NbDatepickerComponent<D> extends NbBasePickerComponent<D, D, NbCale
 
     if (date) {
       this.visibleDate = date;
-      this.picker.visibleDate = date;
-      this.picker.date = date;
+      this.setPickerInput('visibleDate', date);
+      this.setPickerInput('date', date);
     }
   }
 
@@ -637,8 +653,8 @@ export class NbRangepickerComponent<D> extends NbBasePickerComponent<
     if (range) {
       const visibleDate = range && range.start;
       this.visibleDate = visibleDate;
-      this.picker.visibleDate = visibleDate;
-      this.picker.range = range;
+      this.setPickerInput('visibleDate', visibleDate);
+      this.setPickerInput('range', range);
     }
   }
 

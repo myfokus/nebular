@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
@@ -11,6 +12,7 @@ import {
   Type,
   AfterViewChecked,
 } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { NbFocusTrap, NbFocusTrapFactoryService } from '../cdk/a11y/focus-trap';
 import { NbComponentPortal, NbComponentType, NbTemplatePortal } from '../cdk/overlay/mapping';
 import { NbOverlayContainerComponent } from '../cdk/overlay/overlay-container';
@@ -110,9 +112,18 @@ export class NbWindowComponent implements OnInit, AfterViewChecked, OnDestroy {
     protected focusTrapFactory: NbFocusTrapFactoryService,
     protected elementRef: ElementRef,
     protected renderer: Renderer2,
+    protected cd: ChangeDetectorRef,
   ) {}
 
+  protected stateChangeSubscription: Subscription;
+
   ngOnInit() {
+    // The template decides whether to render the card body from windowRef.state through getters,
+    // so a state change tells Angular nothing on its own. Under Angular 22 that is no longer
+    // enough: a detectChanges() on this component's ComponentRef only refreshes the view if it
+    // has been marked, so minimizing and restoring left the body as it was first rendered.
+    this.stateChangeSubscription = this.windowRef.stateChange.subscribe(() => this.cd.markForCheck());
+
     this.focusTrap = this.focusTrapFactory.create(this.elementRef.nativeElement);
     this.focusTrap.blurPreviouslyFocusedElement();
     this.focusTrap.focusInitialElement();
@@ -135,6 +146,10 @@ export class NbWindowComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.stateChangeSubscription) {
+      this.stateChangeSubscription.unsubscribe();
+    }
+
     if (this.focusTrap) {
       this.focusTrap.restoreFocus();
     }

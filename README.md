@@ -94,6 +94,29 @@ break in the fork.
   which makes the property consistent with its `dayCellComponent` and `yearCellComponent` siblings —
   neither of those carried one. Upstream bug, surfaced by the compiler.
 
+**Inputs on dynamically created components.** This one is worth understanding before you touch the
+datepicker or window code, because it is subtle and it silently produced wrong output rather than an
+error.
+
+Angular 22 runs a component's first change detection *while the portal is attaching*. Upstream sets
+the picker's inputs by plain property assignment (`this.picker.visibleDate = date`) **after** the
+attach, and that is not recorded as an input change — it only ever worked because Angular 21's first
+change-detection pass happened later, after the assignment. Under Angular 22 the calendar rendered
+once with nothing set (falling back to today's month, no selection) and only corrected itself on
+some later, unrelated change-detection run. Anything reading the picker straight after `show()` saw
+the stale render. The same shape broke the window: `NbWindowRef` mutates state that the template
+reads through getters, so minimizing and restoring left the body as first rendered.
+
+- `datepicker/datepicker.component.ts`, `datepicker/date-timepicker.component.ts` — a
+  `setPickerInput()` helper routes every input through `ComponentRef.setInput()`, which records the
+  change and marks the view. `openDatepicker()` then renders once synchronously so callers see the
+  patched state. As a side effect this also repairs an upstream bug: `patchWithInputs` assigned
+  `picker._cellComponent`, which only exists on `NbCalendarRangeComponent`, so custom day/month/year
+  cells were silently ignored by the plain `nb-datepicker`. The public input names work for both.
+- `window/window.component.ts` — subscribes to `windowRef.stateChange` and marks itself for check.
+
+Together these fix five `datepicker.spec.ts` regressions and one in `window.service.spec.ts`.
+
 ### CI and release
 
 - `.github/workflows/pr-check.yml` is **replaced**. Upstream's version builds the docs site, the
@@ -160,22 +183,28 @@ are where breakage lands; everything else has been stable.
 
 ## Test suite state
 
-`npm run test:myfokus` is **not green, and was not green upstream either.** Measured on this
+`npm run test:myfokus` is **not green, and was not green upstream either.** Measured on the same
 hardware, `ng test theme`:
 
 | | failing | passing |
 | --- | --- | --- |
 | upstream `v17.0.0` on Angular 21 | 162 | 654 |
-| this fork on Angular 22 / CDK 22 | 107 | 708 |
+| this fork on Angular 22 / CDK 22 | 101 | 714 |
 
-The fork fixes 46 specs that upstream fails and does not regress the vast majority. Six specs do
-regress — five in `datepicker.spec.ts` and one in `window.service.spec.ts` — all traced to
-imperatively-assigned inputs on portal-attached components no longer taking effect under Angular 22
-(`NbDatepickerComponent.patchWithInputs`). That is upstream code this fork did not modify. **This is
-open and tracked in DOK-2520.** Verify date pickers by hand until it is closed.
+Compared spec-by-spec rather than by count: the fork **fixes 47 specs** that upstream fails and
+**regresses none**. `date-fns` is 6/6 green; `eva-icons` has no specs.
 
-Because the suite is red on both sides, treat the *diff* in failures as the gate, not the absolute
-count. Capture a baseline before and after any change.
+Because the suite is red on both sides, **treat the diff in failures as the gate, not the absolute
+count.** Capture a baseline before and after any change:
+
+```bash
+git worktree add ../nebular-baseline v17.0.0
+cd ../nebular-baseline && npm ci && npx ng test theme --watch=false
+```
+
+The ~100 remaining failures are inherited from upstream and were not investigated. They are spread
+across chat, button-group, select, stepper, tag and the overlay directives, and most look like
+change-detection timing assumptions in the specs themselves rather than broken components.
 
 ---
 
