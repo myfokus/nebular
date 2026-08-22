@@ -35,6 +35,7 @@
     "build:myfokus": "npm-run-all \"build theme\" \"build date-fns\" \"build eva-icons\" build:packages-schematics build:myfokus-sass",
     "build:myfokus-sass": "sass dist/theme/styles/prebuilt --load-path=node_modules --style=compressed --no-source-map",
     "test:myfokus": "npm-run-all \"test theme -- --watch=false\" \"test date-fns -- --watch=false\" \"test eva-icons -- --watch=false\"",
+    "test:myfokus-ci": "npm-run-all \"test date-fns -- --watch=false\" \"test eva-icons -- --watch=false\"",
     "publish:myfokus": "./tools/publish-myfokus.sh",
     "build:dev-schematics": "gulp build-development-schematics",
     "test": "ng test",

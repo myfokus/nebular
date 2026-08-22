@@ -5,6 +5,9 @@ import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
 import tseslint from "@typescript-eslint/eslint-plugin";
+// angular-eslint 22 dropped the eslintrc-style "plugin:@angular-eslint/*" shareable configs, so
+// they are pulled from the flat-config entry point instead of through FlatCompat.
+import angular from "angular-eslint";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,15 +21,15 @@ export default [{
     ignores: [
         "src/framework/**/*",
     ],
-}, ...compat.extends(
-    "plugin:@angular-eslint/recommended",
-    "plugin:@angular-eslint/template/process-inline-templates",
-    "eslint-config-prettier",
-).map(config => ({
+}, ...angular.configs.tsRecommended.map(config => ({
+    ...config,
+    files: ["**/*.ts"],
+})), ...compat.extends("eslint-config-prettier").map(config => ({
     ...config,
     files: ["**/*.ts"],
 })), {
     files: ["**/*.ts"],
+    processor: angular.processInlineTemplates,
 
     plugins: {
         rxjs,
@@ -81,12 +84,21 @@ export default [{
             ],
         }],
     },
-}, ...compat.extends("plugin:@angular-eslint/template/recommended", "eslint-config-prettier").map(config => ({
+}, ...angular.configs.templateRecommended.map(config => ({
+    ...config,
+    files: ["**/*.html"],
+})), ...compat.extends("eslint-config-prettier").map(config => ({
     ...config,
     files: ["**/*.html"],
 })), {
     files: ["**/*.html"],
-    rules: {},
+
+    rules: {
+        // angular-eslint 22 added this to its recommended set. The 162 hits are all in upstream's
+        // docs and playground templates, which this fork does not maintain and will not migrate
+        // off *ngIf / *ngFor - src/framework is not linted at all (see ignores above).
+        "@angular-eslint/template/prefer-control-flow": "off",
+    },
 }, {
     files: ["./*.js"],
 

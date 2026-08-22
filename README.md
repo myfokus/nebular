@@ -14,11 +14,11 @@ at Angular 22 / CDK 22 and nothing else.
 
 ## What we publish
 
-| Fork package | Upstream package | Consumed by |
-| --- | --- | --- |
-| `@myfokus/nebular-theme` | `@nebular/theme` | dok-dashboard, dok-admin-dashboard |
+| Fork package                 | Upstream package     | Consumed by                        |
+| ---------------------------- | -------------------- | ---------------------------------- |
+| `@myfokus/nebular-theme`     | `@nebular/theme`     | dok-dashboard, dok-admin-dashboard |
 | `@myfokus/nebular-eva-icons` | `@nebular/eva-icons` | dok-dashboard, dok-admin-dashboard |
-| `@myfokus/nebular-date-fns` | `@nebular/date-fns` | dok-dashboard |
+| `@myfokus/nebular-date-fns`  | `@nebular/date-fns`  | dok-dashboard                      |
 
 Everything else in `src/framework` (`auth`, `moment`, `security`, `firebase-auth`, `bootstrap`,
 `icons`) is **left untouched at its Angular 21 state and is not built, tested or published**. It is
@@ -48,7 +48,7 @@ forked from?" answerable at a glance.
   `author` stays `akveo` — they wrote it.
 - `@myfokus/nebular-date-fns` peers on `date-fns` `^3.0.0 || ^4.0.0`, not `^2.0.0`. The upstream
   package imported `date-fns` submodules as **default** exports (`import { default as parse } from
-  'date-fns/parse'`), which date-fns 3 removed. Against the `date-fns@4` the dashboards actually
+'date-fns/parse'`), which date-fns 3 removed. Against the `date-fns@4` the dashboards actually
   install, upstream's build is broken. Those imports are now named. date-fns 2 is consequently no
   longer supported by this package.
 - `tsconfig.json` gains a `@myfokus/nebular-*` path mapping alongside the upstream `@nebular/*` one,
@@ -67,7 +67,7 @@ extended a CDK class and forwarded constructor arguments now call a zero-argumen
   `BlockScrollStrategy` itself still takes its two arguments and is untouched.
 - `cdk/table/cell.ts`, `cdk/table/table.module.ts`, `tree-grid/tree-grid-def.component.ts`,
   `tree-grid/tree-grid.component.ts` — same treatment. `NbTable` no longer needs a constructor at all.
-- `cdk/a11y/focus-trap.ts` — the opposite direction: CDK 22's `FocusTrap` constructor *gained* an
+- `cdk/a11y/focus-trap.ts` — the opposite direction: CDK 22's `FocusTrap` constructor _gained_ an
   `Injector` parameter, so `NbFocusTrap` takes and forwards one and `NbFocusTrapFactoryService`
   injects it.
 
@@ -88,7 +88,7 @@ break in the fork.
 
 - `tree-grid/tree-grid-def.component.ts` — `ngOnChanges(changes: SimpleChanges)` →
   `SimpleChanges<this>`; Angular 22 made the type generic and the base signature is now narrower.
-- `calendar/calendar-range.component.ts` — `monthCellComponent` was declared as an `@Input()` *and*
+- `calendar/calendar-range.component.ts` — `monthCellComponent` was declared as an `@Input()` _and_
   bound again through the aliased `@Input('monthCellComponent') set _monthCellComponent` setter.
   Angular 22's new NG1054 diagnostic rejects the duplicate binding. The plain `@Input()` was dropped,
   which makes the property consistent with its `dayCellComponent` and `yearCellComponent` siblings —
@@ -98,7 +98,7 @@ break in the fork.
 datepicker or window code, because it is subtle and it silently produced wrong output rather than an
 error.
 
-Angular 22 runs a component's first change detection *while the portal is attaching*. Upstream sets
+Angular 22 runs a component's first change detection _while the portal is attaching_. Upstream sets
 the picker's inputs by plain property assignment (`this.picker.visibleDate = date`) **after** the
 attach, and that is not recorded as an input change — it only ever worked because Angular 21's first
 change-detection pass happened later, after the assignment. Under Angular 22 the calendar rendered
@@ -150,6 +150,7 @@ makes the very first publish a manual one. Done once, by a human with publish ri
 
    `tools/publish-myfokus.sh` passes `--access=public`, which a first publish under a new scope
    needs, and publishes theme first because the other two peer on it.
+
 3. For each of `@myfokus/nebular-theme`, `@myfokus/nebular-eva-icons` and
    `@myfokus/nebular-date-fns`, open the package's settings on npmjs and add a trusted publisher:
    repository `myfokus/nebular`, workflow `publish.yml`. The workflow filename must match exactly.
@@ -205,13 +206,17 @@ are where breakage lands; everything else has been stable.
 `npm run test:myfokus` is **not green, and was not green upstream either.** Measured on the same
 hardware, `ng test theme`:
 
-| | failing | passing |
-| --- | --- | --- |
-| upstream `v17.0.0` on Angular 21 | 162 | 654 |
-| this fork on Angular 22 / CDK 22 | 101 | 714 |
+|                                  | failing | passing |
+| -------------------------------- | ------- | ------- |
+| upstream `v17.0.0` on Angular 21 | 162     | 654     |
+| this fork on Angular 22 / CDK 22 | 101     | 714     |
 
 Compared spec-by-spec rather than by count: the fork **fixes 47 specs** that upstream fails and
 **regresses none**. `date-fns` is 6/6 green; `eva-icons` has no specs.
+
+CI therefore runs `test:myfokus-ci`, which covers `date-fns` and `eva-icons` but not the theme
+suite — gating on a suite that is red upstream would mean a permanently red CI that nobody reads.
+`test:myfokus` still runs all three locally.
 
 Because the suite is red on both sides, **treat the diff in failures as the gate, not the absolute
 count.** Capture a baseline before and after any change:
