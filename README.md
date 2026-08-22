@@ -212,7 +212,10 @@ hardware, `ng test theme`:
 | this fork on Angular 22 / CDK 22 | 101     | 714     |
 
 Compared spec-by-spec rather than by count: the fork **fixes 47 specs** that upstream fails and
-**regresses none**. `date-fns` is 6/6 green; `eva-icons` has no specs.
+**regresses none**. `date-fns` is 6/6 green.
+
+`eva-icons` has no spec files at all, and karma exits non-zero on an empty suite, so it is not in
+either test script — only in the build.
 
 CI therefore runs `test:myfokus-ci`, which covers `date-fns` and `eva-icons` but not the theme
 suite — gating on a suite that is red upstream would mean a permanently red CI that nobody reads.
