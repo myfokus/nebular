@@ -36,7 +36,7 @@
     "build:myfokus-sass": "sass dist/theme/styles/prebuilt --load-path=node_modules --style=compressed --no-source-map",
     "test:myfokus": "npm-run-all \"test theme -- --watch=false\" \"test date-fns -- --watch=false\"",
     "test:myfokus-ci": "npm-run-all \"test date-fns -- --watch=false\"",
-    "publish:myfokus": "./tools/publish-myfokus.sh",
+    "publish:myfokus": "node tools/publish-myfokus.mjs",
     "build:dev-schematics": "gulp build-development-schematics",
     "test": "ng test",
     "test:packages": "npm-run-all \"test theme -- --code-coverage --watch=false\" test:schematics \"test auth -- --code-coverage --watch=false\" \"test moment -- --code-coverage --watch=false\" \"test security -- --code-coverage --watch=false\" \"test date-fns -- --code-coverage --watch=false\" \"test firebase-auth -- --code-coverage --watch=false\" \"test eva-icons -- --code-coverage --watch=false\"",

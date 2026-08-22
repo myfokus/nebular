@@ -125,7 +125,7 @@ Together these fix five `datepicker.spec.ts` regressions and one in `window.serv
   file in favour of our version.**
 - `.github/workflows/deploy-docs.yml` is **deleted** — it publishes the Nebular docs site to
   gh-pages, which this fork has no business doing.
-- `.github/workflows/publish.yml` and `tools/publish-myfokus.sh` are new (see below).
+- `.github/workflows/publish.yml` and `tools/publish-myfokus.mjs` are new (see below).
 - New npm scripts, all prefixed `myfokus` so a rebase makes the divergence obvious:
   `build:myfokus`, `build:myfokus-sass`, `test:myfokus`, `publish:myfokus`.
 
@@ -148,7 +148,7 @@ makes the very first publish a manual one. Done once, by a human with publish ri
    npm ci && npm run build:myfokus && npm run publish:myfokus
    ```
 
-   `tools/publish-myfokus.sh` passes `--access=public`, which a first publish under a new scope
+   `tools/publish-myfokus.mjs` passes `--access=public`, which a first publish under a new scope
    needs, and publishes theme first because the other two peer on it.
 
 3. For each of `@myfokus/nebular-theme`, `@myfokus/nebular-eva-icons` and
@@ -192,7 +192,7 @@ Then, in order:
    `@myfokus/nebular-*` path mapping, and the date-fns named imports are ours regardless of the
    upstream version — unless upstream also fixed date-fns 3/4, in which case take theirs.
 3. **Keep our CI and release files.** `pr-check.yml` will conflict; resolve in favour of ours.
-   `deploy-docs.yml` will come back; delete it again. `publish.yml`, `tools/publish-myfokus.sh` and
+   `deploy-docs.yml` will come back; delete it again. `publish.yml`, `tools/publish-myfokus.mjs` and
    the `myfokus`-prefixed npm scripts are ours and will not conflict.
 4. **Re-check the divergence list above** and rewrite it to match what actually remains.
 5. Run `npm ci && npm run build:myfokus && npm run test:myfokus`, then verify against the dashboards
