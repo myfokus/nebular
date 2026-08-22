@@ -1,4 +1,4 @@
-import { Directive, Input, IterableDiffers, OnChanges, SimpleChanges, TemplateRef } from '@angular/core';
+import { Directive, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {
   NbCdkCellDef,
   NbCdkFooterCellDef,
@@ -33,15 +33,11 @@ export class NbTreeGridRowDefDirective<T> extends NbRowDefDirective<T>
    */
   @Input('nbTreeGridRowDefColumns') columns: Iterable<string>;
 
-  constructor(
-    template: TemplateRef<any>,
-    differs: IterableDiffers,
-    private columnsService: NbColumnsService,
-  ) {
-    super(template, differs);
+  constructor(private columnsService: NbColumnsService) {
+    super();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges<this>) {
     super.ngOnChanges(changes);
 
     if (changes['columns']) {
@@ -80,15 +76,11 @@ export class NbTreeGridHeaderRowDefDirective extends NbHeaderRowDefDirective
    */
   @Input('nbTreeGridHeaderRowDef') columns: Iterable<string>;
 
-  constructor(
-    template: TemplateRef<any>,
-    differs: IterableDiffers,
-    private columnsService: NbColumnsService,
-  ) {
-    super(template, differs);
+  constructor(private columnsService: NbColumnsService) {
+    super();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges<this>) {
     super.ngOnChanges(changes);
 
     if (changes['columns']) {
@@ -127,15 +119,11 @@ export class NbTreeGridFooterRowDefDirective extends NbFooterRowDefDirective
    */
   @Input('nbTreeGridFooterRowDef') columns: Iterable<string>;
 
-  constructor(
-    template: TemplateRef<any>,
-    differs: IterableDiffers,
-    private columnsService: NbColumnsService,
-  ) {
-    super(template, differs);
+  constructor(private columnsService: NbColumnsService) {
+    super();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges<this>) {
     super.ngOnChanges(changes);
 
     if (changes['columns']) {

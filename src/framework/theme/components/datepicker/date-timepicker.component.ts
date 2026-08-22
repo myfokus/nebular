@@ -49,8 +49,8 @@ export class NbDateTimePickerComponent<D>
 
     if (date) {
       this.visibleDate = date;
-      this.picker.visibleDate = date;
-      this.picker.date = date;
+      this.setPickerInput('visibleDate', date);
+      this.setPickerInput('date', date);
       this.picker.cd.markForCheck();
     }
   }
@@ -144,23 +144,25 @@ export class NbDateTimePickerComponent<D>
   }
 
   protected patchWithInputs() {
-    this.picker.singleColumn = this.singleColumn;
-    this.picker.twelveHoursFormat = this.twelveHoursFormat;
-    this.picker.showAmPmLabel = this.showAmPmLabel;
-    this.picker.withSeconds = this.withSeconds;
-    this.picker.step = this.step;
-    this.picker.title = this.title;
-    this.picker.applyButtonText = this.applyButtonText;
-    this.picker.currentTimeButtonText = this.currentTimeButtonText;
-    this.picker.showCurrentTimeButton = this.showCurrentTimeButton;
+    this.setPickerInput('singleColumn', this.singleColumn);
+    this.setPickerInput('twelveHoursFormat', this.twelveHoursFormat);
+    this.setPickerInput('showAmPmLabel', this.showAmPmLabel);
+    this.setPickerInput('withSeconds', this.withSeconds);
+    this.setPickerInput('step', this.step);
+    this.setPickerInput('title', this.title);
+    this.setPickerInput('applyButtonText', this.applyButtonText);
+    this.setPickerInput('currentTimeButtonText', this.currentTimeButtonText);
+    this.setPickerInput('showCurrentTimeButton', this.showCurrentTimeButton);
 
     if (this.twelveHoursFormat) {
-      this.picker.timeFormat = this.dateService.getTwelveHoursFormat();
+      this.setPickerInput('timeFormat', this.dateService.getTwelveHoursFormat());
     } else {
-      this.picker.timeFormat =
+      this.setPickerInput(
+        'timeFormat',
         this.withSeconds && !this.singleColumn
           ? this.dateService.getTwentyFourHoursFormatWithSeconds()
-          : this.dateService.getTwentyFourHoursFormat();
+          : this.dateService.getTwentyFourHoursFormat(),
+      );
     }
     super.patchWithInputs();
 

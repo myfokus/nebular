@@ -1,17 +1,17 @@
 {
-  "name": "@nebular/theme",
-  "version": "17.0.0",
-  "description": "@nebular/theme",
+  "name": "@myfokus/nebular-theme",
+  "version": "17.1.0",
+  "description": "Fork of @nebular/theme, compatible with Angular 22 and @angular/cdk 22",
   "author": "akveo",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akveo/nebular.git"
+    "url": "git+https://github.com/myfokus/nebular.git"
   },
   "bugs": {
-    "url": "https://github.com/akveo/nebular/issues"
+    "url": "https://github.com/myfokus/nebular/issues"
   },
-  "homepage": "https://github.com/akveo/nebular#readme",
+  "homepage": "https://github.com/myfokus/nebular#readme",
   "keywords": [
     "angular",
     "typescript",
@@ -21,11 +21,11 @@
     "nebular"
   ],
   "peerDependencies": {
-    "@angular/animations": "^21.0.0",
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/router": "^21.0.0",
-    "@angular/cdk": "^21.0.0",
+    "@angular/animations": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "@angular/cdk": "^22.0.0",
     "rxjs": "^6.5.3 || ^7.4.0"
   },
   "dependencies": {

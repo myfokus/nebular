@@ -49,6 +49,16 @@ module.exports = function (config) {
   };
 
   if (process.env.CI) {
+    configuration.singleRun = true;
+  }
+
+  // Upstream sends every CI run to akveo's BrowserStack account, whose credentials were hardcoded
+  // in their pr-check workflow. This fork has no BrowserStack subscription and is not entitled to
+  // theirs, so the BrowserStack launcher is only used when credentials are actually supplied -
+  // otherwise CI runs the same headless Chrome as a local run.
+  const hasBrowserStack = process.env.BROWSERSTACK_USERNAME && process.env.BROWSERSTACK_ACCESS_KEY;
+
+  if (process.env.CI && hasBrowserStack) {
     config.browserStack = {
       startTunnel: false,
       build: process.env.BROWSERSTACK_BUILD_NAME,
@@ -59,7 +69,6 @@ module.exports = function (config) {
       user: process.env.BROWSERSTACK_USERNAME,
       key: process.env.BROWSERSTACK_ACCESS_KEY,
     };
-    configuration.singleRun = true;
     configuration.browsers = ['BrowserstackChromeCI'];
     configuration.reporters.push('BrowserStack');
   }

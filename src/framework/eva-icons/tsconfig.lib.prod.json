@@ -4,8 +4,8 @@
   "compilerOptions": {
     "declarationMap": false,
     "paths": {
-      "@nebular/theme": [
-        "dist/theme"
+      "@myfokus/nebular-theme": [
+        "../../../dist/theme"
       ]
     }
   },
