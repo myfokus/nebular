@@ -27,7 +27,9 @@ jobs:
           cache: 'npm'
 
       # Trusted publishing needs npm >= 11.5.1, which is newer than the npm bundled with Node 22.
-      - run: npm install -g npm@latest
+      # Pinned to the 11 line so a future npm major cannot silently change OIDC behaviour, and so
+      # it matches the npm that wrote package-lock.json.
+      - run: npm install -g npm@11
 
       - run: npm ci
 

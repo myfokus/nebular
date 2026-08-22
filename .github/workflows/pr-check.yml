@@ -18,10 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: 'npm'
+
+      # package-lock.json is written by npm 11, which records optional and peer dependencies
+      # differently from the npm 10 that ships with Node 22. Without this, npm ci rejects the
+      # lockfile as incomplete ("Missing: readdirp@... from lock file") even though it is in sync.
+      - run: npm install -g npm@11
 
       - run: npm ci
 
