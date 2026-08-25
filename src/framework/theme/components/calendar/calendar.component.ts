@@ -4,7 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, EventEmitter, Input, Output, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, input, Output, signal, Type } from '@angular/core';
 
 import {
   NbCalendarCell,
@@ -13,8 +13,7 @@ import {
   NbCalendarSizeValues,
   NbCalendarViewModeValues,
 } from '../calendar-kit/model';
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
-
+import { convertToBoolProperty } from '../helpers';
 
 /**
  * Calendar component provides a capability to choose a date.
@@ -194,116 +193,121 @@ import { convertToBoolProperty, NbBooleanInput } from '../helpers';
  * calendar-year-cell-large-height:
  * */
 @Component({
-    selector: 'nb-calendar',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-calendar',
+  template: `
     <nb-base-calendar
-      [boundingMonth]="boundingMonth"
-      [startView]="startView"
+      [boundingMonth]="boundingMonth()"
+      [startView]="startView()"
       [date]="date"
-      [min]="min"
-      [max]="max"
-      [filter]="filter"
-      [dayCellComponent]="dayCellComponent"
-      [monthCellComponent]="monthCellComponent"
-      [yearCellComponent]="yearCellComponent"
-      [size]="size"
-      [visibleDate]="visibleDate"
-      [showNavigation]="showNavigation"
-      [showWeekNumber]="showWeekNumber"
-      [weekNumberSymbol]="weekNumberSymbol"
-      [firstDayOfWeek]="firstDayOfWeek"
+      [min]="min()"
+      [max]="max()"
+      [filter]="filter()"
+      [dayCellComponent]="dayCellComponent()"
+      [monthCellComponent]="monthCellComponent()"
+      [yearCellComponent]="yearCellComponent()"
+      [size]="size()"
+      [visibleDate]="visibleDate()"
+      [showNavigation]="showNavigation()"
+      [showWeekNumber]="showWeekNumber()"
+      [weekNumberSymbol]="weekNumberSymbol()"
+      [firstDayOfWeek]="firstDayOfWeek()"
       (dateChange)="dateChange.emit($event)"
     ></nb-base-calendar>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbCalendarComponent<D> {
-
   /**
    * Defines if we should render previous and next months
    * in the current month view.
    * */
-  @Input() boundingMonth: boolean = true;
+  readonly boundingMonth = input<boolean>(true);
 
   /**
    * Defines starting view for calendar.
    * */
-  @Input() startView: NbCalendarViewMode = NbCalendarViewMode.DATE;
-  static ngAcceptInputType_startView: NbCalendarViewModeValues;
+  readonly startView = input<NbCalendarViewMode, NbCalendarViewMode | NbCalendarViewModeValues>(
+    NbCalendarViewMode.DATE,
+    { transform: (value) => value as NbCalendarViewMode },
+  );
 
   /**
    * Minimum available date for selection.
    * */
-  @Input() min: D;
+  readonly min = input<D>();
 
   /**
    * Maximum available date for selection.
    * */
-  @Input() max: D;
+  readonly max = input<D>();
 
   /**
    * Predicate that decides which cells will be disabled.
    * */
-  @Input() filter: (D) => boolean;
+  readonly filter = input<(D) => boolean>();
 
   /**
    * Custom day cell component. Have to implement `NbCalendarCell` interface.
    * */
-  @Input() dayCellComponent: Type<NbCalendarCell<D, D>>;
+  readonly dayCellComponent = input<Type<NbCalendarCell<D, D>>>();
 
   /**
    * Custom month cell component. Have to implement `NbCalendarCell` interface.
    * */
-  @Input() monthCellComponent: Type<NbCalendarCell<D, D>>;
+  readonly monthCellComponent = input<Type<NbCalendarCell<D, D>>>();
 
   /**
    * Custom year cell component. Have to implement `NbCalendarCell` interface.
    * */
-  @Input() yearCellComponent: Type<NbCalendarCell<D, D>>;
+  readonly yearCellComponent = input<Type<NbCalendarCell<D, D>>>();
 
   /**
    * Size of the calendar and entire components.
    * Can be 'medium' which is default or 'large'.
    * */
-  @Input() size: NbCalendarSize = NbCalendarSize.MEDIUM;
-  static ngAcceptInputType_size: NbCalendarSizeValues;
+  readonly size = input<NbCalendarSize, NbCalendarSize | NbCalendarSizeValues>(NbCalendarSize.MEDIUM, {
+    transform: (value) => value as NbCalendarSize,
+  });
 
-  @Input() visibleDate: D;
+  readonly visibleDate = input<D>();
 
   /**
    * Determines should we show calendars navigation or not.
    * */
-  @Input() showNavigation: boolean = true;
+  readonly showNavigation = input<boolean>(true);
 
   /**
    * Date which will be rendered as selected.
+   *
+   * Kept as a decorator input backed by a signal: NbCalendarWithTimeComponent assigns `this.date`
+   * imperatively and the datepickers read `picker.date` as a plain property.
    * */
-  @Input() date: D;
+  @Input()
+  get date(): D {
+    return this._date();
+  }
+  set date(date: D) {
+    this._date.set(date);
+  }
+  private readonly _date = signal<D>(undefined);
 
   /**
    * Determines should we show week numbers column.
    * False by default.
    * */
-  @Input()
-  get showWeekNumber(): boolean {
-    return this._showWeekNumber;
-  }
-  set showWeekNumber(value: boolean) {
-    this._showWeekNumber = convertToBoolProperty(value);
-  }
-  protected _showWeekNumber: boolean = false;
-  static ngAcceptInputType_showWeekNumber: NbBooleanInput;
+  readonly showWeekNumber = input(false, { transform: convertToBoolProperty });
 
   /**
    * Sets symbol used as a header for week numbers column
    * */
-  @Input() weekNumberSymbol: string = '#';
+  readonly weekNumberSymbol = input<string>('#');
 
   /**
    * Sets first day of the week, it can be 1 if week starts from monday and 0 if from sunday and so on.
    * `undefined` means that default locale setting will be used.
    * */
-  @Input() firstDayOfWeek: number | undefined;
+  readonly firstDayOfWeek = input<number | undefined>();
 
   /**
    * Emits date when selected.

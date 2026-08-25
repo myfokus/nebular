@@ -16,26 +16,26 @@ import { NbPortalOutletDirective } from '../cdk/overlay/mapping';
 import { NbTimePickerComponent } from '../timepicker/timepicker.component';
 
 @Component({
-    selector: 'nb-calendar-with-time',
-    template: `
+  selector: 'nb-calendar-with-time',
+  template: `
     <nb-card class="calendar-with-time">
       <nb-card-body class="picker-body">
         <nb-base-calendar
-          [boundingMonth]="boundingMonth"
-          [startView]="startView"
+          [boundingMonth]="boundingMonth()"
+          [startView]="startView()"
           [date]="date"
-          [min]="min"
-          [max]="max"
-          [filter]="filter"
-          [dayCellComponent]="dayCellComponent"
-          [monthCellComponent]="monthCellComponent"
-          [yearCellComponent]="yearCellComponent"
-          [size]="size"
-          [visibleDate]="visibleDate"
-          [showNavigation]="showNavigation"
-          [showWeekNumber]="showWeekNumber"
-          [weekNumberSymbol]="weekNumberSymbol"
-          [firstDayOfWeek]="firstDayOfWeek"
+          [min]="min()"
+          [max]="max()"
+          [filter]="filter()"
+          [dayCellComponent]="dayCellComponent()"
+          [monthCellComponent]="monthCellComponent()"
+          [yearCellComponent]="yearCellComponent()"
+          [size]="size()"
+          [visibleDate]="visibleDate()"
+          [showNavigation]="showNavigation()"
+          [showWeekNumber]="showWeekNumber()"
+          [weekNumberSymbol]="weekNumberSymbol()"
+          [firstDayOfWeek]="firstDayOfWeek()"
           (dateChange)="onDateValueChange($event)"
         >
         </nb-base-calendar>
@@ -71,16 +71,11 @@ import { NbTimePickerComponent } from '../timepicker/timepicker.component';
       </nb-card-footer>
     </nb-card>
   `,
-    styleUrls: ['./calendar-with-time-container.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  styleUrls: ['./calendar-with-time-container.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class NbCalendarWithTimeComponent<D> extends NbCalendarComponent<D> implements OnInit, AfterViewInit {
-  /**
-   * Defines selected date.
-   * */
-  @Input() visibleDate: D;
-
   /**
    * Defines 12 hours format like '07:00 PM'.
    * */
@@ -184,6 +179,6 @@ export class NbCalendarWithTimeComponent<D> extends NbCalendarComponent<D> imple
   }
 
   isLarge(): boolean {
-    return this.size === NbCalendarSize.LARGE;
+    return this.size() === NbCalendarSize.LARGE;
   }
 }

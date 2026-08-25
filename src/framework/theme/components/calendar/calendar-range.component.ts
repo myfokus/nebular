@@ -4,7 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, EventEmitter, Input, Output, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, input, Output, signal, Type } from '@angular/core';
 
 import {
   NbCalendarCell,
@@ -17,8 +17,7 @@ import { NbDateService } from '../calendar-kit/services/date.service';
 import { NbCalendarRangeDayCellComponent } from './calendar-range-day-cell.component';
 import { NbCalendarRangeYearCellComponent } from './calendar-range-year-cell.component';
 import { NbCalendarRangeMonthCellComponent } from './calendar-range-month-cell.component';
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
-
+import { convertToBoolProperty } from '../helpers';
 
 export interface NbCalendarRange<D> {
   start: D;
@@ -164,141 +163,146 @@ export interface NbCalendarRange<D> {
  * calendar-year-cell-large-height:
  * */
 @Component({
-    selector: 'nb-calendar-range',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-calendar-range',
+  template: `
     <nb-base-calendar
       [date]="range"
       (dateChange)="onChange($any($event))"
-      [min]="min"
-      [max]="max"
-      [filter]="filter"
-      [startView]="startView"
-      [boundingMonth]="boundingMonth"
-      [dayCellComponent]="dayCellComponent"
-      [monthCellComponent]="monthCellComponent"
-      [yearCellComponent]="yearCellComponent"
-      [visibleDate]="visibleDate"
-      [showNavigation]="showNavigation"
-      [size]="size"
-      [showWeekNumber]="showWeekNumber"
-      [weekNumberSymbol]="weekNumberSymbol"
-      [firstDayOfWeek]="firstDayOfWeek"
+      [min]="min()"
+      [max]="max()"
+      [filter]="filter()"
+      [startView]="startView()"
+      [boundingMonth]="boundingMonth()"
+      [dayCellComponent]="dayCellComponent()"
+      [monthCellComponent]="monthCellComponent()"
+      [yearCellComponent]="yearCellComponent()"
+      [visibleDate]="visibleDate()"
+      [showNavigation]="showNavigation()"
+      [size]="size()"
+      [showWeekNumber]="showWeekNumber()"
+      [weekNumberSymbol]="weekNumberSymbol()"
+      [firstDayOfWeek]="firstDayOfWeek()"
     ></nb-base-calendar>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbCalendarRangeComponent<D> {
   /**
    * Defines if we should render previous and next months
    * in the current month view.
    * */
-  @Input() boundingMonth: boolean = true;
+  readonly boundingMonth = input<boolean>(true);
 
   /**
    * Defines starting view for the calendar.
    * */
-  @Input() startView: NbCalendarViewMode = NbCalendarViewMode.DATE;
-  static ngAcceptInputType_startView: NbCalendarViewModeValues;
+  readonly startView = input<NbCalendarViewMode, NbCalendarViewMode | NbCalendarViewModeValues>(
+    NbCalendarViewMode.DATE,
+    { transform: (value) => value as NbCalendarViewMode },
+  );
 
   /**
    * A minimum available date for selection.
    * */
-  @Input() min: D;
+  readonly min = input<D>();
 
   /**
    * A maximum available date for selection.
    * */
-  @Input() max: D;
+  readonly max = input<D>();
 
   /**
    * A predicate that decides which cells will be disabled.
    * */
-  @Input() filter: (D) => boolean;
+  readonly filter = input<(D) => boolean>();
 
   /**
    * Custom day cell component. Have to implement `NbCalendarCell` interface.
+   * Falsy values keep the default range day cell.
    * */
-  @Input('dayCellComponent')
-  set _cellComponent(cellComponent: Type<NbCalendarCell<D, NbCalendarRange<D>>>) {
-    if (cellComponent) {
-      this.dayCellComponent = cellComponent;
-    }
-  }
-  dayCellComponent: Type<NbCalendarCell<D, NbCalendarRange<D>>> = NbCalendarRangeDayCellComponent;
+  readonly dayCellComponent = input<
+    Type<NbCalendarCell<D, NbCalendarRange<D>>>,
+    Type<NbCalendarCell<D, NbCalendarRange<D>>> | null | undefined
+  >(NbCalendarRangeDayCellComponent, {
+    transform: (cellComponent) => cellComponent || NbCalendarRangeDayCellComponent,
+  });
 
   /**
    * Custom month cell component. Have to implement `NbCalendarCell` interface.
+   * Falsy values keep the default range month cell.
    * */
-  @Input('monthCellComponent')
-  set _monthCellComponent(cellComponent: Type<NbCalendarCell<D, NbCalendarRange<D>>>) {
-    if (cellComponent) {
-      this.monthCellComponent = cellComponent;
-    }
-  }
-  monthCellComponent: Type<NbCalendarCell<D, NbCalendarRange<D>>> = NbCalendarRangeMonthCellComponent;
+  readonly monthCellComponent = input<
+    Type<NbCalendarCell<D, NbCalendarRange<D>>>,
+    Type<NbCalendarCell<D, NbCalendarRange<D>>> | null | undefined
+  >(NbCalendarRangeMonthCellComponent, {
+    transform: (cellComponent) => cellComponent || NbCalendarRangeMonthCellComponent,
+  });
 
   /**
    * Custom year cell component. Have to implement `NbCalendarCell` interface.
+   * Falsy values keep the default range year cell.
    * */
-  @Input('yearCellComponent')
-  set _yearCellComponent(cellComponent: Type<NbCalendarCell<D, NbCalendarRange<D>>>) {
-    if (cellComponent) {
-      this.yearCellComponent = cellComponent;
-    }
-  }
-  yearCellComponent: Type<NbCalendarCell<D, NbCalendarRange<D>>> = NbCalendarRangeYearCellComponent;
+  readonly yearCellComponent = input<
+    Type<NbCalendarCell<D, NbCalendarRange<D>>>,
+    Type<NbCalendarCell<D, NbCalendarRange<D>>> | null | undefined
+  >(NbCalendarRangeYearCellComponent, {
+    transform: (cellComponent) => cellComponent || NbCalendarRangeYearCellComponent,
+  });
 
   /**
    * Size of the calendar and entire components.
    * Can be 'medium' which is default or 'large'.
    * */
-  @Input() size: NbCalendarSize = NbCalendarSize.MEDIUM;
-  static ngAcceptInputType_size: NbCalendarSizeValues;
+  readonly size = input<NbCalendarSize, NbCalendarSize | NbCalendarSizeValues>(NbCalendarSize.MEDIUM, {
+    transform: (value) => value as NbCalendarSize,
+  });
 
-  @Input() visibleDate: D;
+  readonly visibleDate = input<D>();
 
   /**
    * Determines should we show calendars navigation or not.
    * */
-  @Input() showNavigation: boolean = true;
+  readonly showNavigation = input<boolean>(true);
 
   /**
    * Range which will be rendered as selected.
+   *
+   * Kept as a decorator input backed by a signal: the component mutates it while a range is being
+   * picked and the rangepicker assigns `picker.range` as a plain property.
    * */
-  @Input() range: NbCalendarRange<D>;
+  @Input()
+  get range(): NbCalendarRange<D> {
+    return this._range();
+  }
+  set range(range: NbCalendarRange<D>) {
+    this._range.set(range);
+  }
+  private readonly _range = signal<NbCalendarRange<D>>(undefined);
 
   /**
    * Determines should we show week numbers column.
    * False by default.
    * */
-  @Input()
-  get showWeekNumber(): boolean {
-    return this._showWeekNumber;
-  }
-  set showWeekNumber(value: boolean) {
-    this._showWeekNumber = convertToBoolProperty(value);
-  }
-  protected _showWeekNumber: boolean = false;
-  static ngAcceptInputType_showWeekNumber: NbBooleanInput;
+  readonly showWeekNumber = input(false, { transform: convertToBoolProperty });
 
   /**
    * Sets symbol used as a header for week numbers column
    * */
-  @Input() weekNumberSymbol: string = '#';
+  readonly weekNumberSymbol = input<string>('#');
 
   /**
    * Sets first day of the week, it can be 1 if week starts from monday and 0 if from sunday and so on.
    * `undefined` means that default locale setting will be used.
    * */
-  @Input() firstDayOfWeek: number | undefined;
+  readonly firstDayOfWeek = input<number | undefined>();
 
   /**
    * Emits range when start selected and emits again when end selected.
    * */
   @Output() rangeChange: EventEmitter<NbCalendarRange<D>> = new EventEmitter();
 
-  constructor(protected dateService: NbDateService<D>) {
-  }
+  constructor(protected dateService: NbDateService<D>) {}
 
   onChange(date: D) {
     this.initDateIfNull();
