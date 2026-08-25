@@ -4,7 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, Signal, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { Params, QueryParamsHandling } from '@angular/router';
 import { Observable, BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
@@ -26,6 +26,10 @@ const itemSelect$ = new ReplaySubject<NbMenuBag>(1);
 const itemHover$ = new ReplaySubject<NbMenuBag>(1);
 const submenuToggle$ = new ReplaySubject<NbMenuBag>(1);
 const collapseAll$ = new ReplaySubject<{ tag: string }>(1);
+// Bumped after every mutation of the shared NbMenuItem objects. Menu components are OnPush and
+// read item fields through computeds depending on this tick, so silent mutations (resetSelection,
+// collapseItems) still reach the views.
+const itemsStateTick = signal(0);
 
 export type NbMenuBadgeConfig = Omit<NbBadge, 'position'>;
 
@@ -203,11 +207,26 @@ export class NbMenuService {
   onSubmenuToggle(): Observable<NbMenuBag> {
     return submenuToggle$.pipe(share());
   }
+
+  /**
+   * Re-renders every menu from the shared NbMenuItem objects. Menu views are OnPush and cannot
+   * observe plain field writes, so call this after mutating item fields in place from
+   * application code.
+   */
+  refresh() {
+    itemsStateTick.update((tick) => tick + 1);
+  }
 }
 
 @Injectable()
 export class NbMenuInternalService {
+  readonly stateTick: Signal<number> = itemsStateTick.asReadonly();
+
   constructor(private location: Location) {}
+
+  notifyStateChange() {
+    itemsStateTick.update((tick) => tick + 1);
+  }
 
   prepareItems(items: NbMenuItem[]) {
     const defaultItem = new NbMenuItem();
@@ -215,6 +234,7 @@ export class NbMenuInternalService {
       this.applyDefaults(i, defaultItem);
       this.setParent(i);
     });
+    this.notifyStateChange();
   }
 
   selectFromUrl(items: NbMenuItem[], tag: string, collapseOther: boolean = false) {
@@ -222,6 +242,9 @@ export class NbMenuInternalService {
     if (selectedItem) {
       this.selectItem(selectedItem, items, collapseOther, tag);
     }
+    // Applications may mutate item fields in place on navigation (this runs on every
+    // NavigationEnd), so re-render even when no item matched the url.
+    this.notifyStateChange();
   }
 
   selectItem(item: NbMenuItem, items: NbMenuItem[], collapseOther: boolean = false, tag: string) {
@@ -259,6 +282,8 @@ export class NbMenuInternalService {
     for (const collapsedItem of collapsedItems) {
       this.submenuToggle(collapsedItem, tag);
     }
+
+    this.notifyStateChange();
   }
 
   collapseAll(items: NbMenuItem[], tag: string, except?: NbMenuItem) {
@@ -267,6 +292,8 @@ export class NbMenuInternalService {
     for (const item of collapsedItems) {
       this.submenuToggle(item, tag);
     }
+
+    this.notifyStateChange();
   }
 
   onAddItem(): Observable<{ tag: string; items: NbMenuItem[] }> {
@@ -291,6 +318,7 @@ export class NbMenuInternalService {
 
   submenuToggle(item: NbMenuItem, tag?: string) {
     submenuToggle$.next({ tag, item });
+    this.notifyStateChange();
   }
 
   itemSelect(item: NbMenuItem, tag?: string) {
