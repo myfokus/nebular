@@ -1,4 +1,4 @@
-import { NgModule, Component, Provider } from '@angular/core';
+import { ChangeDetectionStrategy, NgModule, Component, Provider } from '@angular/core';
 import { CdkTable, CdkTableModule } from '@angular/cdk/table';
 import { ViewportRuler } from '@angular/cdk/overlay';
 
@@ -39,15 +39,14 @@ export const NB_TABLE_TEMPLATE = `
  * through the constructor have to reach it through DI instead. Without this the table would measure
  * the window viewport rather than the nb-layout scroll container, and sticky rows would misplace.
  */
-export const NB_TABLE_PROVIDERS: Provider[] = [
-  { provide: ViewportRuler, useExisting: NbViewportRulerAdapter },
-];
+export const NB_TABLE_PROVIDERS: Provider[] = [{ provide: ViewportRuler, useExisting: NbViewportRulerAdapter }];
 
 @Component({
-    selector: 'nb-table-not-implemented',
-    template: ``,
-    providers: NB_TABLE_PROVIDERS,
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-table-not-implemented',
+  template: ``,
+  providers: NB_TABLE_PROVIDERS,
+  standalone: false,
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
 export class NbTable<T> extends CdkTable<T> {}
@@ -83,8 +82,8 @@ const COMPONENTS = [
 ];
 
 @NgModule({
-  imports: [ NbBidiModule ],
-  declarations: [ ...COMPONENTS ],
-  exports: [ ...COMPONENTS ],
+  imports: [NbBidiModule],
+  declarations: [...COMPONENTS],
+  exports: [...COMPONENTS],
 })
 export class NbTableModule extends CdkTableModule {}

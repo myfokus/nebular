@@ -5,24 +5,23 @@
  */
 
 import {
+  ChangeDetectionStrategy,
   Component,
-  Input,
   HostBinding,
   ViewChild,
   ElementRef,
-  ContentChildren,
-  QueryList,
   AfterViewInit,
-  ContentChild,
-  SimpleChanges,
-  AfterContentInit,
-  OnChanges,
+  contentChild,
+  contentChildren,
+  effect,
+  input,
+  untracked,
 } from '@angular/core';
 
 import { NbStatusService } from '../../services/status.service';
 import { NbComponentSize } from '../component-size';
 import { NbComponentOrCustomStatus } from '../component-status';
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
+import { convertToBoolProperty } from '../helpers';
 import { NbChatFormComponent } from './chat-form.component';
 import { NbChatMessageComponent } from './chat-message.component';
 import { NbChatCustomMessageService } from './chat-custom-message.service';
@@ -238,92 +237,83 @@ import { NbChatTitleDirective } from './chat-title.directive';
  * chat-message-file-background-color:
  */
 @Component({
-    selector: 'nb-chat',
-    styleUrls: ['./chat.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-chat',
+  styleUrls: ['./chat.component.scss'],
+  template: `
     <div class="header">
       <ng-container
-        *ngIf="titleTemplate; else textTitleTemplate"
-        [ngTemplateOutlet]="titleTemplate.templateRef"
-        [ngTemplateOutletContext]="{ $implicit: titleTemplate.context }"
+        *ngIf="titleTemplate(); else textTitleTemplate"
+        [ngTemplateOutlet]="titleTemplate().templateRef"
+        [ngTemplateOutletContext]="{ $implicit: titleTemplate().context }"
       >
       </ng-container>
       <ng-template #textTitleTemplate>
-        {{ title }}
+        {{ title() }}
       </ng-template>
     </div>
 
     <div class="scrollable" #scrollable>
       <div class="messages">
         <ng-content select="nb-chat-message"></ng-content>
-        <p class="no-messages" *ngIf="!messages?.length">{{ noMessagesPlaceholder }}</p>
+        <p class="no-messages" *ngIf="!messages().length">{{ noMessagesPlaceholder() }}</p>
       </div>
     </div>
     <div class="form">
       <ng-content select="nb-chat-form"></ng-content>
     </div>
   `,
-    providers: [NbChatCustomMessageService],
-    standalone: false
+  providers: [NbChatCustomMessageService],
+  standalone: false,
 })
-export class NbChatComponent implements OnChanges, AfterContentInit, AfterViewInit {
-  @Input() title: string;
+export class NbChatComponent implements AfterViewInit {
+  readonly title = input<string>();
 
   /**
    * Chat size, available sizes:
    * `tiny`, `small`, `medium`, `large`, `giant`
    */
-  @Input() size: NbComponentSize;
+  readonly size = input<NbComponentSize>();
 
   /**
    * Chat status color (adds specific styles):
    * `basic` (default), `primary`, `success`, `info`, `warning`, `danger`, `control`.
    */
-  @Input() status: NbComponentOrCustomStatus = 'basic';
+  readonly status = input<NbComponentOrCustomStatus>('basic');
 
-  @Input() noMessagesPlaceholder: string = 'No messages yet.';
+  readonly noMessagesPlaceholder = input<string>('No messages yet.');
 
   /**
    * Scroll chat to the bottom of the list when a new message arrives
    */
-  @Input()
-  get scrollBottom(): boolean {
-    return this._scrollBottom;
-  }
-  set scrollBottom(value: boolean) {
-    this._scrollBottom = convertToBoolProperty(value);
-  }
-  protected _scrollBottom: boolean = true;
-  static ngAcceptInputType_scrollBottom: NbBooleanInput;
+  readonly scrollBottom = input(true, { transform: convertToBoolProperty });
 
   @ViewChild('scrollable') scrollable: ElementRef;
-  @ContentChildren(NbChatMessageComponent) messages: QueryList<NbChatMessageComponent>;
-  @ContentChild(NbChatFormComponent) chatForm: NbChatFormComponent;
-  @ContentChild(NbChatTitleDirective) titleTemplate: NbChatTitleDirective;
+  readonly messages = contentChildren(NbChatMessageComponent);
+  readonly chatForm = contentChild(NbChatFormComponent);
+  readonly titleTemplate = contentChild(NbChatTitleDirective);
 
-  constructor(protected statusService: NbStatusService) {}
+  constructor(protected statusService: NbStatusService) {
+    effect(() => {
+      this.messages();
+      untracked(() => this.updateView());
+    });
 
-  ngOnChanges(changes: SimpleChanges) {
-    if ('status' in changes) {
-      this.updateFormStatus();
-    }
-  }
-
-  ngAfterContentInit() {
-    this.updateFormStatus();
+    effect(() => {
+      const status = this.status();
+      const chatForm = this.chatForm();
+      if (chatForm) {
+        untracked(() => chatForm.setStatus(status));
+      }
+    });
   }
 
   ngAfterViewInit() {
-    this.messages.changes.subscribe((messages) => {
-      this.messages = messages;
-      this.updateView();
-    });
-
     this.updateView();
   }
 
   updateView() {
-    if (this.scrollBottom) {
+    if (this.scrollBottom() && this.scrollable) {
       this.scrollListBottom();
     }
   }
@@ -332,76 +322,70 @@ export class NbChatComponent implements OnChanges, AfterContentInit, AfterViewIn
     this.scrollable.nativeElement.scrollTop = this.scrollable.nativeElement.scrollHeight;
   }
 
-  protected updateFormStatus(): void {
-    if (this.chatForm) {
-      this.chatForm.setStatus(this.status);
-    }
-  }
-
   @HostBinding('class.size-tiny')
   get tiny(): boolean {
-    return this.size === 'tiny';
+    return this.size() === 'tiny';
   }
 
   @HostBinding('class.size-small')
   get small(): boolean {
-    return this.size === 'small';
+    return this.size() === 'small';
   }
 
   @HostBinding('class.size-medium')
   get medium(): boolean {
-    return this.size === 'medium';
+    return this.size() === 'medium';
   }
 
   @HostBinding('class.size-large')
   get large(): boolean {
-    return this.size === 'large';
+    return this.size() === 'large';
   }
 
   @HostBinding('class.size-giant')
   get giant(): boolean {
-    return this.size === 'giant';
+    return this.size() === 'giant';
   }
 
   @HostBinding('class.status-primary')
   get primary(): boolean {
-    return this.status === 'primary';
+    return this.status() === 'primary';
   }
 
   @HostBinding('class.status-success')
   get success(): boolean {
-    return this.status === 'success';
+    return this.status() === 'success';
   }
 
   @HostBinding('class.status-info')
   get info(): boolean {
-    return this.status === 'info';
+    return this.status() === 'info';
   }
 
   @HostBinding('class.status-warning')
   get warning(): boolean {
-    return this.status === 'warning';
+    return this.status() === 'warning';
   }
 
   @HostBinding('class.status-danger')
   get danger(): boolean {
-    return this.status === 'danger';
+    return this.status() === 'danger';
   }
 
   @HostBinding('class.status-basic')
   get basic(): boolean {
-    return this.status === 'basic';
+    return this.status() === 'basic';
   }
 
   @HostBinding('class.status-control')
   get control(): boolean {
-    return this.status === 'control';
+    return this.status() === 'control';
   }
 
   @HostBinding('class')
   get additionalClasses(): string[] {
-    if (this.statusService.isCustomStatus(this.status)) {
-      return [this.statusService.getStatusClass(this.status)];
+    if (this.statusService.isCustomStatus(this.status())) {
+      return [this.statusService.getStatusClass(this.status())];
     }
     return [];
   }

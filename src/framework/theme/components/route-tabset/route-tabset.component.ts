@@ -4,10 +4,10 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, Input, Output, EventEmitter, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Output, EventEmitter, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
+import { convertToBoolProperty } from '../helpers';
 import { NbIconConfig } from '../icon/icon.component';
 
 export interface NbRouteTab {
@@ -96,11 +96,12 @@ export interface NbRouteTab {
  * route-tabset-scrollbar-width:
  */
 @Component({
-    selector: 'nb-route-tabset',
-    styleUrls: ['./route-tabset.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-route-tabset',
+  styleUrls: ['./route-tabset.component.scss'],
+  template: `
     <ul class="route-tabset">
-      <ng-container *ngFor="let tab of tabs">
+      <ng-container *ngFor="let tab of tabs()">
         <li
           *ngIf="tab.disabled; else enabled"
           [class.responsive]="tab.responsive"
@@ -116,7 +117,7 @@ export interface NbRouteTab {
         <ng-template #enabled>
           <li
             routerLinkActive="active"
-            [routerLinkActiveOptions]="activeLinkOptions | nbMergeConfigs: tab.activeLinkOptions"
+            [routerLinkActiveOptions]="activeLinkOptions() | nbMergeConfigs : tab.activeLinkOptions"
             class="route-tab"
           >
             <a
@@ -141,31 +142,28 @@ export interface NbRouteTab {
     </ul>
     <router-outlet></router-outlet>
   `,
-    standalone: false
+  host: {
+    '[class.full-width]': 'fullWidth()',
+  },
+  standalone: false,
 })
 export class NbRouteTabsetComponent {
-  @HostBinding('class.full-width') fullWidthValue: boolean = false;
-
   /**
    * Tabs configuration
    */
-  @Input() tabs: NbRouteTab[];
+  readonly tabs = input<NbRouteTab[]>();
 
   /**
    * Options passed to `routerLinkActiveOptions` directive which set on tab links.
    * `{ exact: true }` by default.
    */
-  @Input() activeLinkOptions: RouterLinkActive['routerLinkActiveOptions'] = { exact: true };
+  readonly activeLinkOptions = input<RouterLinkActive['routerLinkActiveOptions']>({ exact: true });
 
   /**
    * Take full width of a parent
    * @param {boolean} val
    */
-  @Input()
-  set fullWidth(val: boolean) {
-    this.fullWidthValue = convertToBoolProperty(val);
-  }
-  static ngAcceptInputType_fullWidth: NbBooleanInput;
+  readonly fullWidth = input(false, { transform: convertToBoolProperty });
 
   /**
    * Emits when tab is selected

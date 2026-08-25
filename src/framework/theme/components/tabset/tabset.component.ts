@@ -6,17 +6,20 @@
 
 import { map, delay, filter, takeUntil } from 'rxjs/operators';
 import {
+  ChangeDetectionStrategy,
   Component,
   Input,
   Output,
   EventEmitter,
-  ContentChildren,
-  QueryList,
   AfterContentInit,
   HostBinding,
-  ChangeDetectorRef,
-  ContentChild,
   OnDestroy,
+  contentChild,
+  contentChildren,
+  effect,
+  inject,
+  input,
+  signal,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -40,106 +43,84 @@ import { NbTabTitleDirective } from './tab-title.directive';
  * ```
  */
 @Component({
-    selector: 'nb-tab',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-tab',
+  template: `
     <ng-container
-      *ngIf="tabContentDirective; else projectedContent"
-      [ngTemplateOutlet]="tabContentDirective.templateRef"
+      *ngIf="tabContentDirective(); else projectedContent"
+      [ngTemplateOutlet]="tabContentDirective().templateRef"
     ></ng-container>
 
     <ng-template #projectedContent>
       <ng-content></ng-content>
     </ng-template>
   `,
-    standalone: false
+  host: {
+    '[class.disabled]': 'disabled()',
+  },
+  standalone: false,
 })
 export class NbTabComponent {
-  @ContentChild(NbTabContentDirective) tabContentDirective: NbTabContentDirective;
-  @ContentChild(NbTabTitleDirective) tabTitleDirective: NbTabTitleDirective;
+  readonly tabContentDirective = contentChild(NbTabContentDirective);
+  readonly tabTitleDirective = contentChild(NbTabTitleDirective);
 
   /**
    * Tab title
    * @type {string}
    */
-  @Input() tabTitle: string;
+  readonly tabTitle = input<string>();
 
   /**
    * Tab id
    * @type {string}
    */
-  @Input() tabId: string;
+  readonly tabId = input<string>();
 
   /**
    * Use badge dot mode
    * @type {boolean}
    */
-  @Input()
-  get badgeDot(): boolean {
-    return this._badgeDot;
-  }
-  set badgeDot(val: boolean) {
-    this._badgeDot = convertToBoolProperty(val);
-  }
-  protected _badgeDot: boolean;
-  static ngAcceptInputType_badgeDot: NbBooleanInput;
+  readonly badgeDot = input(false, { transform: convertToBoolProperty });
 
   /**
    * Tab icon name or icon config object
    * @type {string | NbIconConfig}
    */
-  @Input() tabIcon: string | NbIconConfig;
+  readonly tabIcon = input<string | NbIconConfig>();
 
   /**
    * Item is disabled and cannot be opened.
    * @type {boolean}
    */
-  @Input('disabled')
-  @HostBinding('class.disabled')
-  get disabled(): boolean {
-    return this.disabledValue;
-  }
-  set disabled(val: boolean) {
-    this.disabledValue = convertToBoolProperty(val);
-  }
-  static ngAcceptInputType_disabled: NbBooleanInput;
+  readonly disabled = input(false, { transform: convertToBoolProperty });
 
   /**
    * Show only icons when width is smaller than `tabs-icon-only-max-width`
    * @type {boolean}
    */
-  @Input()
-  set responsive(val: boolean) {
-    this.responsiveValue = convertToBoolProperty(val);
-  }
-  get responsive() {
-    return this.responsiveValue;
-  }
-  static ngAcceptInputType_responsive: NbBooleanInput;
+  readonly responsive = input(false, { transform: convertToBoolProperty });
 
   /**
    * Makes this tab a link that initiates navigation to a route
    * @type string
    */
-  @Input() route: string;
+  readonly route = input<string>();
 
-  @HostBinding('class.content-active')
-  activeValue: boolean = false;
-
-  responsiveValue: boolean = false;
-  disabledValue = false;
+  private readonly _active = signal(false);
 
   /**
    * Specifies active tab
    * @returns {boolean}
    */
   @Input()
-  get active() {
-    return this.activeValue;
+  @HostBinding('class.content-active')
+  get active(): boolean {
+    return this._active();
   }
   set active(val: boolean) {
-    this.activeValue = convertToBoolProperty(val);
-    if (this.activeValue) {
-      this.init = true;
+    this._active.set(convertToBoolProperty(val));
+    if (this._active()) {
+      this.init.set(true);
     }
   }
   static ngAcceptInputType_active: NbBooleanInput;
@@ -150,24 +131,20 @@ export class NbTabComponent {
    * @deprecated This setting never worked. Wrap content into a `nbTabContent` to make it lazy.
    * @breaking-change Remove 12.0.0
    */
-  @Input()
-  set lazyLoad(val: boolean) {
-    this.init = convertToBoolProperty(val);
-  }
-  static ngAcceptInputType_lazyLoad: NbBooleanInput;
+  readonly lazyLoad = input(false, { transform: convertToBoolProperty });
 
   /**
    * Badge text to display
    * @type string
    */
-  @Input() badgeText: string;
+  readonly badgeText = input<string>();
 
   /**
    * Badge status (adds specific styles):
    * 'primary', 'info', 'success', 'warning', 'danger'
    * @param {string} val
    */
-  @Input() badgeStatus: NbComponentOrCustomStatus = 'basic';
+  readonly badgeStatus = input<NbComponentOrCustomStatus>('basic');
 
   /**
    * Badge position.
@@ -176,14 +153,24 @@ export class NbTabComponent {
    * 'top start', 'top end', 'bottom start', 'bottom end'
    * @type string
    */
-  @Input() badgePosition: NbBadgePosition;
+  readonly badgePosition = input<NbBadgePosition>();
 
   /**
    * @deprecated
    * @breaking-change Remove 12.0.0
    * @docs-private
    */
-  init: boolean = false;
+  readonly init = signal(false);
+
+  constructor() {
+    // Once initialized (by `lazyLoad` or by becoming active), a tab stays initialized —
+    // an unbound `lazyLoad` input must not reset `init` set by the `active` setter.
+    effect(() => {
+      if (this.lazyLoad()) {
+        this.init.set(true);
+      }
+    });
+  }
 }
 
 // TODO: Combine tabset with route-tabset, so that we can:
@@ -298,67 +285,64 @@ export class NbTabComponent {
  * tabset-scrollbar-width:
  */
 @Component({
-    selector: 'nb-tabset',
-    styleUrls: ['./tabset.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-tabset',
+  styleUrls: ['./tabset.component.scss'],
+  template: `
     <ul class="tabset">
       <li
-        *ngFor="let tab of tabs"
+        *ngFor="let tab of tabs()"
         (click)="selectTab(tab)"
         (keyup.space)="selectTab(tab)"
         (keyup.enter)="selectTab(tab)"
-        [class.responsive]="tab.responsive"
+        [class.responsive]="tab.responsive()"
         [class.active]="tab.active"
-        [class.disabled]="tab.disabled"
-        [attr.tabindex]="tab.disabled ? -1 : 0"
-        [attr.data-tab-id]="tab.tabId"
+        [class.disabled]="tab.disabled()"
+        [attr.tabindex]="tab.disabled() ? -1 : 0"
+        [attr.data-tab-id]="tab.tabId()"
         class="tab"
       >
         <a href (click)="$event.preventDefault()" tabindex="-1" class="tab-link">
-          <nb-icon *ngIf="tab.tabIcon" [config]="tab.tabIcon"></nb-icon>
+          <nb-icon *ngIf="tab.tabIcon()" [config]="tab.tabIcon()"></nb-icon>
           <ng-container
-            *ngIf="tab.tabTitleDirective; else textTitleTemplate"
-            [ngTemplateOutlet]="tab.tabTitleDirective.templateRef"
+            *ngIf="tab.tabTitleDirective(); else textTitleTemplate"
+            [ngTemplateOutlet]="tab.tabTitleDirective().templateRef"
           ></ng-container>
           <ng-template #textTitleTemplate>
-            <span class="tab-text">{{ tab.tabTitle }}</span>
+            <span class="tab-text">{{ tab.tabTitle() }}</span>
           </ng-template>
         </a>
         <nb-badge
-          *ngIf="tab.badgeText || tab.badgeDot"
-          [text]="tab.badgeText"
-          [dotMode]="tab.badgeDot"
-          [status]="tab.badgeStatus"
-          [position]="tab.badgePosition"
+          *ngIf="tab.badgeText() || tab.badgeDot()"
+          [text]="tab.badgeText()"
+          [dotMode]="tab.badgeDot()"
+          [status]="tab.badgeStatus()"
+          [position]="tab.badgePosition()"
         >
         </nb-badge>
       </li>
     </ul>
     <ng-content select="nb-tab"></ng-content>
   `,
-    standalone: false
+  host: {
+    '[class.full-width]': 'fullWidth()',
+  },
+  standalone: false,
 })
 export class NbTabsetComponent implements AfterContentInit, OnDestroy {
-  @ContentChildren(NbTabComponent) tabs: QueryList<NbTabComponent>;
-
-  @HostBinding('class.full-width')
-  fullWidthValue: boolean = false;
+  readonly tabs = contentChildren(NbTabComponent);
 
   /**
    * Take full width of a parent
    * @param {boolean} val
    */
-  @Input()
-  set fullWidth(val: boolean) {
-    this.fullWidthValue = convertToBoolProperty(val);
-  }
-  static ngAcceptInputType_fullWidth: NbBooleanInput;
+  readonly fullWidth = input(false, { transform: convertToBoolProperty });
 
   /**
    * If specified - tabset listens to this parameter and selects corresponding tab.
    * @type {string}
    */
-  @Input() routeParam: string;
+  readonly routeParam = input<string>();
 
   /**
    * Emits when tab is selected
@@ -368,23 +352,21 @@ export class NbTabsetComponent implements AfterContentInit, OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
 
-  constructor(private route: ActivatedRoute, private changeDetectorRef: ChangeDetectorRef) {}
+  private readonly route = inject(ActivatedRoute);
 
-  // TODO: refactoring this component, avoid change detection loop
   ngAfterContentInit() {
     this.route.params
       .pipe(
         map((params: any) =>
-          this.tabs.find((tab) => (this.routeParam ? tab.route === params[this.routeParam] : tab.active)),
+          this.tabs().find((tab) => (this.routeParam() ? tab.route() === params[this.routeParam()] : tab.active)),
         ),
         delay(0),
-        map((tab: NbTabComponent) => tab || this.tabs.first),
+        map((tab: NbTabComponent) => tab || this.tabs()[0]),
         filter((tab: NbTabComponent) => !!tab),
         takeUntil(this.destroy$),
       )
       .subscribe((tabToSelect: NbTabComponent) => {
         this.selectTab(tabToSelect);
-        this.changeDetectorRef.markForCheck();
       });
   }
 
@@ -395,8 +377,8 @@ export class NbTabsetComponent implements AfterContentInit, OnDestroy {
 
   // TODO: navigate to routeParam
   selectTab(selectedTab: NbTabComponent) {
-    if (!selectedTab.disabled) {
-      this.tabs.forEach((tab) => (tab.active = tab === selectedTab));
+    if (!selectedTab.disabled()) {
+      this.tabs().forEach((tab) => (tab.active = tab === selectedTab));
       this.changeTab.emit(selectedTab);
     }
   }

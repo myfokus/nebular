@@ -68,10 +68,10 @@ import { NbIconConfig } from '../icon/icon.component';
  * - Noop mode - the component won't react to the user interaction.
  */
 @Directive({
-    selector: '[nbTooltip]',
-    exportAs: 'nbTooltip',
-    providers: [NbDynamicOverlayHandler, NbDynamicOverlay],
-    standalone: false
+  selector: '[nbTooltip]',
+  exportAs: 'nbTooltip',
+  providers: [NbDynamicOverlayHandler, NbDynamicOverlay],
+  standalone: false,
 })
 export class NbTooltipDirective implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   protected destroy$ = new Subject<void>();
@@ -128,7 +128,8 @@ export class NbTooltipDirective implements OnInit, OnChanges, AfterViewInit, OnD
    */
   @Input('nbTooltipIcon')
   set icon(icon: string | NbIconConfig) {
-    this.context = Object.assign(this.context, { icon });
+    // New object identity so the container's `context` signal input registers the change.
+    this.context = { ...this.context, icon };
   }
 
   /**
@@ -137,7 +138,8 @@ export class NbTooltipDirective implements OnInit, OnChanges, AfterViewInit, OnD
    */
   @Input('nbTooltipStatus')
   set status(status: NbComponentOrCustomStatus) {
-    this.context = Object.assign(this.context, { status });
+    // New object identity so the container's `context` signal input registers the change.
+    this.context = { ...this.context, status };
   }
 
   /**

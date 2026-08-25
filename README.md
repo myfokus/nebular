@@ -24,9 +24,13 @@ Everything else in `src/framework` (`auth`, `moment`, `security`, `firebase-auth
 `icons`) is **left untouched at its Angular 21 state and is not built, tested or published**. It is
 kept only so the diff against upstream stays small. Do not assume it compiles.
 
-Versioning follows the upstream base: the fork is `17.1.0`, meaning "upstream 17.0.0 plus our
-compatibility changes". Keeping the major aligned with upstream is what makes "which release is this
-forked from?" answerable at a glance.
+**The major tracks the Angular major we target**, which is the convention upstream Nebular itself
+follows: Nebular 16 targets Angular 20, Nebular 17 targets Angular 21. This fork targets Angular 22,
+so it is `18.0.0` — the question a version has to answer here is "which Angular does this run on?".
+
+The fork is branched from upstream `v17.0.0` regardless of its own version; `LICENSE.txt` and the
+original copyright headers record the provenance. Note that `17.1.0`, the first published fork
+release, already targeted Angular 22 and so predates this rule.
 
 ## How this fork diverges from upstream
 
@@ -113,7 +117,8 @@ reads through getters, so minimizing and restoring left the body as first render
   patched state. As a side effect this also repairs an upstream bug: `patchWithInputs` assigned
   `picker._cellComponent`, which only exists on `NbCalendarRangeComponent`, so custom day/month/year
   cells were silently ignored by the plain `nb-datepicker`. The public input names work for both.
-- `window/window.component.ts` — subscribes to `windowRef.stateChange` and marks itself for check.
+- `window/window.component.ts` — reads `windowRef.stateChange` as a signal, so the host bindings
+  follow the window state. It marked itself for check before the signal rebuild.
 
 Together these fix five `datepicker.spec.ts` regressions and one in `window.service.spec.ts`.
 
@@ -206,13 +211,15 @@ are where breakage lands; everything else has been stable.
 `npm run test:myfokus` is **not green, and was not green upstream either.** Measured on the same
 hardware, `ng test theme`:
 
-|                                  | failing | passing |
-| -------------------------------- | ------- | ------- |
-| upstream `v17.0.0` on Angular 21 | 162     | 654     |
-| this fork on Angular 22 / CDK 22 | 101     | 714     |
+|                                    | failing | passing |
+| ---------------------------------- | ------- | ------- |
+| upstream `v17.0.0` on Angular 21   | 162     | 654     |
+| this fork on Angular 22 / CDK 22   | 101     | 714     |
+| this fork after the signal rebuild | 69      | 747     |
 
 Compared spec-by-spec rather than by count: the fork **fixes 47 specs** that upstream fails and
-**regresses none**. `date-fns` is 6/6 green.
+**regresses none**. The signal rebuild (see below) then fixed a further 33 and regressed none.
+`date-fns` is 6/6 green.
 
 `eva-icons` has no spec files at all, and karma exits non-zero on an empty suite, so it is not in
 either test script — only in the build.
@@ -229,9 +236,44 @@ git worktree add ../nebular-baseline v17.0.0
 cd ../nebular-baseline && npm ci && npx ng test theme --watch=false
 ```
 
-The ~100 remaining failures are inherited from upstream and were not investigated. They are spread
-across chat, button-group, select, stepper, tag and the overlay directives, and most look like
+The remaining failures are inherited from upstream and were not investigated. They are spread
+across chat, button-group, select, tag and the overlay directives, and most look like
 change-detection timing assumptions in the specs themselves rather than broken components.
+
+## Change detection
+
+Every component in the published packages declares its strategy explicitly, and all of them are
+`OnPush`. Nothing relies on the framework default: Angular 22 links a library component that
+declares no strategy as `OnPush` anyway, so leaving it off would mean shipping whatever the linker
+decides.
+
+The components hold their template state in signals, so a write re-renders on its own — do not add
+`markForCheck()` when converting or extending one. Two patterns carry the cases signals do not
+cover on their own:
+
+- **Members consumers assign imperatively** (`picker.range = …`, `stepper.selectedIndex = n`,
+  `tab.active = …`) keep a decorator `@Input` accessor backed by a private signal. The assignment
+  keeps working and still marks the view dirty.
+- **Shared mutable models** — `NbMenuItem` is the one that matters — stay plain objects, because
+  applications build and mutate them. `NbMenuInternalService` bumps a module-level tick on every
+  mutating path and the menu views read item fields through computeds that depend on it. An
+  application that mutates item fields in place itself should call `NbMenuService.refresh()`.
+
+### Writing specs against these components
+
+`fixture.detectChanges()` refreshes a view only if something marked it dirty. Assigning a plain
+field on a test host after creation marks nothing, so the template keeps rendering the old value
+and the assertion fails on a component that is actually correct — or, in dev mode, the write is
+caught one check later as an `NG0100`. Set the input instead:
+
+```ts
+fixture.componentRef.setInput('disableStepNavigation', true);
+fixture.detectChanges();
+```
+
+Writes made _before_ the first `detectChanges()` need none of this — the initial render picks them
+up. This is what most of the remaining upstream failures are: specs that assume a change-detection
+sweep they no longer get.
 
 ---
 

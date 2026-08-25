@@ -4,20 +4,13 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import {
-  Component,
-  Input,
-  TemplateRef,
-  Type,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, Type, ViewChild, input } from '@angular/core';
 import { NbComponentPortal, NbTemplatePortal } from '../cdk/overlay/mapping';
 import {
   NbOverlayContainerComponent,
   NbPositionedContainerComponent,
   NbRenderableContainer,
 } from '../cdk/overlay/overlay-container';
-
 
 /**
  * Overlay container.
@@ -39,19 +32,20 @@ import {
  * popover-padding:
  * */
 @Component({
-    selector: 'nb-popover',
-    styleUrls: ['./popover.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-popover',
+  styleUrls: ['./popover.component.scss'],
+  template: `
     <span class="arrow"></span>
     <nb-overlay-container></nb-overlay-container>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbPopoverComponent extends NbPositionedContainerComponent implements NbRenderableContainer {
   @ViewChild(NbOverlayContainerComponent) overlayContainer: NbOverlayContainerComponent;
 
-  @Input() content: any;
-  @Input() context: Object;
+  readonly content = input<any>();
+  readonly context = input<Object>();
 
   renderContent() {
     this.detachContent();
@@ -63,9 +57,10 @@ export class NbPopoverComponent extends NbPositionedContainerComponent implement
   }
 
   protected attachContent() {
-    if (this.content instanceof TemplateRef) {
+    const content = this.content();
+    if (content instanceof TemplateRef) {
       this.attachTemplate();
-    } else if (this.content instanceof Type) {
+    } else if (content instanceof Type) {
       this.attachComponent();
     } else {
       this.attachString();
@@ -73,17 +68,18 @@ export class NbPopoverComponent extends NbPositionedContainerComponent implement
   }
 
   protected attachTemplate() {
-    this.overlayContainer
-      .attachTemplatePortal(new NbTemplatePortal(this.content, null, <any>{ $implicit: this.context }));
+    this.overlayContainer.attachTemplatePortal(
+      new NbTemplatePortal(this.content(), null, <any>{ $implicit: this.context() }),
+    );
   }
 
   protected attachComponent() {
-    const portal = new NbComponentPortal(this.content, null, null);
-    const ref = this.overlayContainer.attachComponentPortal(portal, this.context);
+    const portal = new NbComponentPortal(this.content(), null, null);
+    const ref = this.overlayContainer.attachComponentPortal(portal, this.context());
     ref.changeDetectorRef.detectChanges();
   }
 
   protected attachString() {
-    this.overlayContainer.attachStringContent(this.content);
+    this.overlayContainer.attachStringContent(this.content());
   }
 }

@@ -44,14 +44,14 @@ import {
 import { NbMenuInternalService } from './menu.service';
 
 @Component({
-    template: '',
-    standalone: false
+  template: '',
+  standalone: false,
 })
 export class NoopComponent {}
 
 @Component({
-    template: `<nb-menu [items]="items" [tag]="menuTag"></nb-menu>`,
-    standalone: false
+  template: `<nb-menu [items]="items" [tag]="menuTag"></nb-menu>`,
+  standalone: false,
 })
 export class SingleMenuTestComponent {
   constructor(public menuPublicService: NbMenuService) {}
@@ -61,11 +61,11 @@ export class SingleMenuTestComponent {
 }
 
 @Component({
-    template: `
+  template: `
     <nb-menu [items]="firstMenuItems" [tag]="firstMenuTag"></nb-menu>
     <nb-menu [items]="secondMenuItems" [tag]="secondMenuTag"></nb-menu>
   `,
-    standalone: false
+  standalone: false,
 })
 export class DoubleMenusTestComponent {
   constructor(public menuPublicService: NbMenuService) {}
@@ -141,7 +141,7 @@ function createMenuItems(items: Partial<NbMenuItem>[], menuInternaleService: NbM
 describe('NbMenuItem', () => {
   it('should set tag attribute for menu services', () => {
     const { fixture } = createSingleMenuComponent([{ title: 'Home' }], 'menu');
-    const nbMenuTag = fixture.componentInstance.menuComponent.tag;
+    const nbMenuTag = fixture.componentInstance.menuComponent.tag();
     expect(nbMenuTag).toEqual('menu');
   });
 
@@ -231,6 +231,36 @@ describe('NbMenuItem', () => {
     fixture.detectChanges();
 
     expect(iconComponent.componentInstance.icon).toEqual('chevron-right-outline');
+  });
+});
+
+describe('menu active state after navigation', () => {
+  it('should move the active highlight to the newly selected item and clear the previous one', async () => {
+    const routes: Routes = [
+      { path: 'menu-1', component: NoopComponent },
+      { path: 'menu-2', component: NoopComponent },
+    ];
+    createTestBed(routes);
+    const fixture = TestBed.createComponent(SingleMenuTestComponent);
+    fixture.componentInstance.items = [
+      { title: 'Item 1', link: '/menu-1' },
+      { title: 'Item 2', link: '/menu-2' },
+    ] as NbMenuItem[];
+    fixture.componentInstance.menuTag = 'menu';
+    fixture.detectChanges();
+    const router = TestBed.inject(Router);
+
+    await router.navigate(['menu-1']);
+    fixture.detectChanges();
+    let activeItems = fixture.nativeElement.querySelectorAll('a.active');
+    expect(activeItems.length).toEqual(1);
+    expect(activeItems[0].textContent).toContain('Item 1');
+
+    await router.navigate(['menu-2']);
+    fixture.detectChanges();
+    activeItems = fixture.nativeElement.querySelectorAll('a.active');
+    expect(activeItems.length).toEqual(1);
+    expect(activeItems[0].textContent).toContain('Item 2');
   });
 });
 

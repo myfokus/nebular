@@ -1,6 +1,6 @@
 {
   "name": "@myfokus/nebular-eva-icons",
-  "version": "17.1.0",
+  "version": "18.0.0",
   "description": "Fork of @nebular/eva-icons, compatible with Angular 22 and @angular/cdk 22",
   "author": "akveo",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "eva-icons"
   ],
   "peerDependencies": {
-    "@myfokus/nebular-theme": "^17.1.0",
+    "@myfokus/nebular-theme": "^18.0.0",
     "eva-icons": "^1.1.3"
   },
   "dependencies": {

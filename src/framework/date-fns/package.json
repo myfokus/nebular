@@ -1,6 +1,6 @@
 {
   "name": "@myfokus/nebular-date-fns",
-  "version": "17.1.0",
+  "version": "18.0.0",
   "description": "Fork of @nebular/date-fns, compatible with Angular 22, @angular/cdk 22 and date-fns 3/4",
   "author": "akveo",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "nebular"
   ],
   "peerDependencies": {
-    "@myfokus/nebular-theme": "^17.1.0",
+    "@myfokus/nebular-theme": "^18.0.0",
     "date-fns": "^3.0.0 || ^4.0.0"
   },
   "dependencies": {

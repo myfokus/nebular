@@ -4,7 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, HostBinding, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, input } from '@angular/core';
 
 import { NbStatusService } from '../../services/status.service';
 import { NbComponentSize } from '../component-size';
@@ -95,108 +95,107 @@ import { NbComponentOrCustomStatus } from '../component-status';
  * progress-bar-control-text-color:
  */
 @Component({
-    selector: 'nb-progress-bar',
-    styleUrls: ['./progress-bar.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-progress-bar',
+  styleUrls: ['./progress-bar.component.scss'],
+  template: `
     <div class="progress-container">
-      <div class="progress-value" [style.width.%]="value">
-        <span *ngIf="displayValue">{{ value }}%</span>
+      <div class="progress-value" [style.width.%]="value()">
+        <span *ngIf="displayValue()">{{ value() }}%</span>
         <ng-content></ng-content>
       </div>
     </div>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbProgressBarComponent {
-
   /**
    * Progress bar value in percent (0 - 100)
    */
-  @Input() value: number = 0;
+  readonly value = input<number>(0);
 
   /**
    * Progress bar background (`basic` (default), `primary`, `info`, `success`, `warning`, `danger`, `control`)
    */
-  @Input() status: NbComponentOrCustomStatus = 'basic';
+  readonly status = input<NbComponentOrCustomStatus>('basic');
 
   /**
    * Progress bar size (`tiny`, `small`, `medium` (default), `large`, `giant`)
    */
-  @Input() size: NbComponentSize = 'medium';
+  readonly size = input<NbComponentSize>('medium');
 
   /**
    * Displays value inside progress bar
    */
-  @Input() displayValue: boolean = false;
+  readonly displayValue = input<boolean>(false);
 
   @HostBinding('class.size-tiny')
   get tiny(): boolean {
-    return this.size === 'tiny';
+    return this.size() === 'tiny';
   }
 
   @HostBinding('class.size-small')
   get small(): boolean {
-    return this.size === 'small';
+    return this.size() === 'small';
   }
 
   @HostBinding('class.size-medium')
   get medium(): boolean {
-    return this.size === 'medium';
+    return this.size() === 'medium';
   }
 
   @HostBinding('class.size-large')
   get large(): boolean {
-    return this.size === 'large';
+    return this.size() === 'large';
   }
 
   @HostBinding('class.size-giant')
   get giant(): boolean {
-    return this.size === 'giant';
+    return this.size() === 'giant';
   }
 
   @HostBinding('class.status-primary')
   get primary(): boolean {
-    return this.status === 'primary';
+    return this.status() === 'primary';
   }
 
   @HostBinding('class.status-success')
   get success(): boolean {
-    return this.status === 'success';
+    return this.status() === 'success';
   }
 
   @HostBinding('class.status-info')
   get info(): boolean {
-    return this.status === 'info';
+    return this.status() === 'info';
   }
 
   @HostBinding('class.status-warning')
   get warning(): boolean {
-    return this.status === 'warning';
+    return this.status() === 'warning';
   }
 
   @HostBinding('class.status-danger')
   get danger(): boolean {
-    return this.status === 'danger';
+    return this.status() === 'danger';
   }
 
   @HostBinding('class.status-basic')
   get basic(): boolean {
-    return this.status === 'basic';
+    return this.status() === 'basic';
   }
 
   @HostBinding('class.status-control')
   get control(): boolean {
-    return this.status === 'control';
+    return this.status() === 'control';
   }
 
   @HostBinding('class')
   get additionalClasses(): string[] {
-    if (this.statusService.isCustomStatus(this.status)) {
-      return [this.statusService.getStatusClass(this.status)];
+    if (this.statusService.isCustomStatus(this.status())) {
+      return [this.statusService.getStatusClass(this.status())];
     }
     return [];
   }
 
-  constructor(protected statusService: NbStatusService) {
-  }
+  constructor(protected statusService: NbStatusService) {}
 }

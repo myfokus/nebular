@@ -1,4 +1,13 @@
-import { Component, Inject, Input, TemplateRef, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Inject,
+  Input,
+  input,
+  signal,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
 import { NbStepperComponent } from './stepper.component';
 import { NB_STEPPER } from './stepper-tokens';
 import { convertToBoolProperty, NbBooleanInput } from '../helpers';
@@ -8,16 +17,16 @@ import { convertToBoolProperty, NbBooleanInput } from '../helpers';
  * Container for a step
  */
 @Component({
-    selector: 'nb-step',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-step',
+  template: `
     <ng-template>
       <ng-content></ng-content>
     </ng-template>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbStepComponent {
-
   protected stepper: NbStepperComponent;
 
   // TODO static must be false as of Angular 9.0.0, issues/1514
@@ -31,29 +40,21 @@ export class NbStepComponent {
   /**
    * Top level abstract control of the step
    */
-  @Input() stepControl?: { valid: boolean | null, reset: () => void };
+  readonly stepControl = input<{ valid: boolean | null; reset: () => void }>();
 
   /**
    * Step label
    *
    * @type {string|TemplateRef<any>}
    */
-  @Input() label: string|TemplateRef<any>;
+  readonly label = input<string | TemplateRef<any>>();
 
   /**
    * Whether step will be displayed in wizard
    *
    * @type {boolean}
    */
-  @Input()
-  get hidden(): boolean {
-    return this._hidden;
-  }
-  set hidden(value: boolean) {
-    this._hidden = convertToBoolProperty(value);
-  }
-  protected _hidden = false;
-  static ngAcceptInputType_hidden: NbBooleanInput;
+  readonly hidden = input(false, { transform: convertToBoolProperty });
 
   /**
    * Check that label is a TemplateRef.
@@ -61,7 +62,7 @@ export class NbStepComponent {
    * @return boolean
    * */
   get isLabelTemplate(): boolean {
-    return this.label instanceof TemplateRef;
+    return this.label() instanceof TemplateRef;
   }
 
   /**
@@ -71,19 +72,28 @@ export class NbStepComponent {
    */
   @Input()
   get completed(): boolean {
-    return this._completed || this.isCompleted;
+    return this._completed() || this.isCompleted;
   }
   set completed(value: boolean) {
-    this._completed = convertToBoolProperty(value);
+    this._completed.set(convertToBoolProperty(value));
   }
-  protected _completed: boolean = false;
+  private readonly _completed = signal(false);
   static ngAcceptInputType_completed: NbBooleanInput;
 
   protected get isCompleted() {
-    return this.stepControl ? this.stepControl.valid && this.interacted : this.interacted;
+    const stepControl = this.stepControl();
+    return stepControl ? stepControl.valid && this.interacted : this.interacted;
   }
 
-  interacted = false;
+  // Written by the parent stepper (markCurrentStepInteracted) and reset() — the signal
+  // keeps parent-template reads of `completed` tracked under OnPush.
+  get interacted(): boolean {
+    return this._interacted();
+  }
+  set interacted(value: boolean) {
+    this._interacted.set(value);
+  }
+  private readonly _interacted = signal(false);
 
   constructor(@Inject(NB_STEPPER) stepper) {
     this.stepper = stepper;
@@ -101,8 +111,9 @@ export class NbStepComponent {
    * */
   reset(): void {
     this.interacted = false;
-    if (this.stepControl) {
-      this.stepControl.reset();
+    const stepControl = this.stepControl();
+    if (stepControl) {
+      stepControl.reset();
     }
   }
 }

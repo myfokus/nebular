@@ -4,10 +4,11 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { NbMenuItem } from '../../components/menu/menu.service';
 import { NbPositionedContainerComponent, NbRenderableContainer } from '../cdk/overlay/overlay-container';
+import { NbOverlayContent } from '../cdk/overlay/overlay-service';
 
 /**
  * Context menu component used as content within NbContextMenuDirective.
@@ -25,20 +26,20 @@ import { NbPositionedContainerComponent, NbRenderableContainer } from '../cdk/ov
  * context-menu-shadow:
  * */
 @Component({
-    selector: 'nb-context-menu',
-    template: `
-    <nb-menu class="context-menu" [items]="context.items" [tag]="context.tag"></nb-menu>
-  `,
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-context-menu',
+  template: ` <nb-menu class="context-menu" [items]="context().items" [tag]="context().tag"></nb-menu> `,
+  standalone: false,
 })
 export class NbContextMenuComponent extends NbPositionedContainerComponent implements NbRenderableContainer {
+  readonly items = input<NbMenuItem[]>([]);
+  readonly tag = input<string>();
 
-  @Input() items: NbMenuItem[] = [];
-  @Input() tag: string;
+  readonly context = input<{ items: NbMenuItem[]; tag?: string }>({ items: [] });
 
-  @Input()
-  context: { items: NbMenuItem[], tag?: string } = { items: [] };
-
+  // Unused by the template, but NbDynamicOverlay always writes `content` via setInput,
+  // so the container must declare it as an input.
+  readonly content = input<NbOverlayContent>();
 
   /**
    * The method is empty since we don't need to do anything additionally

@@ -146,7 +146,9 @@ export class NbToastContainer {
   }
 
   protected updateContainer() {
-    patch(this.containerRef, { content: this.toasts, position: this.position });
+    // Fresh array: `content` is a signal input on the container, so setting the same mutated
+    // array reference again would be skipped by the input signal's equality check.
+    patch(this.containerRef, { content: [...this.toasts], position: this.position });
   }
 }
 

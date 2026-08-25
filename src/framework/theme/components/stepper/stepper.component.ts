@@ -5,16 +5,18 @@
  */
 
 import {
+  ChangeDetectionStrategy,
   Component,
-  ContentChildren,
+  contentChildren,
   EventEmitter,
   HostBinding,
   Input,
+  input,
   Output,
-  QueryList,
+  signal,
   TemplateRef,
 } from '@angular/core';
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
+import { convertToBoolProperty } from '../helpers';
 import { NB_STEPPER } from './stepper-tokens';
 import { NbStepComponent } from './step.component';
 
@@ -118,11 +120,12 @@ export interface NbStepChangeEvent {
  * stepper-step-content-padding:
  */
 @Component({
-    selector: 'nb-stepper',
-    styleUrls: ['./stepper.component.scss'],
-    templateUrl: './stepper.component.html',
-    providers: [{ provide: NB_STEPPER, useExisting: NbStepperComponent }],
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-stepper',
+  styleUrls: ['./stepper.component.scss'],
+  templateUrl: './stepper.component.html',
+  providers: [{ provide: NB_STEPPER, useExisting: NbStepperComponent }],
+  standalone: false,
 })
 export class NbStepperComponent {
   /**
@@ -130,19 +133,19 @@ export class NbStepperComponent {
    */
   @Input()
   get selectedIndex() {
-    return this._selectedIndex;
+    return this._selectedIndex();
   }
   set selectedIndex(index: number) {
-    if (!this.steps) {
-      this._selectedIndex = index;
+    if (!this.steps().length) {
+      this._selectedIndex.set(index);
       return;
     }
 
     this.markCurrentStepInteracted();
     if (this.canBeSelected(index)) {
-      const previouslySelectedIndex = this._selectedIndex;
+      const previouslySelectedIndex = this._selectedIndex();
       const previouslySelectedStep = this.selected;
-      this._selectedIndex = index;
+      this._selectedIndex.set(index);
 
       this.stepChange.emit({
         index: this.selectedIndex,
@@ -153,54 +156,38 @@ export class NbStepperComponent {
     }
   }
 
-  protected _selectedIndex: number = 0;
+  private readonly _selectedIndex = signal(0);
 
   /**
    * Disables navigation by clicking on steps. False by default
    * @param {boolean} value
    */
-  @Input()
-  set disableStepNavigation(value: boolean) {
-    this._disableStepNavigation = convertToBoolProperty(value);
-  }
-  get disableStepNavigation(): boolean {
-    return this._disableStepNavigation;
-  }
-  protected _disableStepNavigation: boolean = false;
-  static ngAcceptInputType_disableStepNavigation: NbBooleanInput;
+  readonly disableStepNavigation = input(false, { transform: convertToBoolProperty });
 
   /**
    * Selected step component
    */
   @Input()
   get selected(): NbStepComponent {
-    return this.steps ? this.steps.toArray()[this.selectedIndex] : undefined;
+    return this.steps()[this.selectedIndex];
   }
   set selected(step: NbStepComponent) {
-    if (!this.steps) {
+    if (!this.steps().length) {
       return;
     }
-    this.selectedIndex = this.steps.toArray().indexOf(step);
+    this.selectedIndex = this.steps().indexOf(step);
   }
 
   /**
    * Stepper orientation - `horizontal`|`vertical`
    */
-  @Input() orientation: NbStepperOrientation = 'horizontal';
+  readonly orientation = input<NbStepperOrientation>('horizontal');
 
   /**
    * Allow moving forward only if the current step is complete
    * @default true
    */
-  @Input()
-  set linear(value: boolean) {
-    this._linear = convertToBoolProperty(value);
-  }
-  get linear(): boolean {
-    return this._linear;
-  }
-  protected _linear = true;
-  static ngAcceptInputType_linear: NbBooleanInput;
+  readonly linear = input(true, { transform: convertToBoolProperty });
 
   /**
    * Emits when step changed
@@ -210,20 +197,20 @@ export class NbStepperComponent {
 
   @HostBinding('class.vertical')
   get vertical() {
-    return this.orientation === 'vertical';
+    return this.orientation() === 'vertical';
   }
   @HostBinding('class.horizontal')
   get horizontal() {
-    return this.orientation === 'horizontal';
+    return this.orientation() === 'horizontal';
   }
 
-  @ContentChildren(NbStepComponent) steps: QueryList<NbStepComponent>;
+  readonly steps = contentChildren(NbStepComponent);
 
   /**
    * Navigate to next step
    * */
   next() {
-    this.selectedIndex = Math.min(this.selectedIndex + 1, this.steps.length - 1);
+    this.selectedIndex = Math.min(this.selectedIndex + 1, this.steps().length - 1);
   }
 
   /**
@@ -238,7 +225,7 @@ export class NbStepperComponent {
    * @param { NbStepComponent } step
    */
   changeStep(step: NbStepComponent) {
-    if (!this.disableStepNavigation) {
+    if (!this.disableStepNavigation()) {
       step.select();
     }
   }
@@ -250,8 +237,8 @@ export class NbStepperComponent {
     const previouslySelectedIndex = this.selectedIndex;
     const previouslySelectedStep = this.selected;
 
-    this._selectedIndex = 0;
-    this.steps.forEach((step) => step.reset());
+    this._selectedIndex.set(0);
+    this.steps().forEach((step) => step.reset());
 
     this.stepChange.emit({
       index: this.selectedIndex,
@@ -270,22 +257,23 @@ export class NbStepperComponent {
    **/
   getStepTemplate(step: NbStepComponent): TemplateRef<any> | null {
     if (step.isLabelTemplate) {
-      return step.label as TemplateRef<any>;
+      return step.label() as TemplateRef<any>;
     }
     return null;
   }
 
   protected isStepValid(index: number): boolean {
-    return this.steps.toArray()[index].completed;
+    return this.steps()[index].completed;
   }
 
   protected canBeSelected(indexToCheck: number): boolean {
-    const noSteps = !this.steps || this.steps.length === 0;
-    if (noSteps || indexToCheck < 0 || indexToCheck >= this.steps.length || indexToCheck === this.selectedIndex) {
+    const steps = this.steps();
+    const noSteps = steps.length === 0;
+    if (noSteps || indexToCheck < 0 || indexToCheck >= steps.length || indexToCheck === this.selectedIndex) {
       return false;
     }
 
-    if (indexToCheck <= this.selectedIndex || !this.linear) {
+    if (indexToCheck <= this.selectedIndex || !this.linear()) {
       return true;
     }
 

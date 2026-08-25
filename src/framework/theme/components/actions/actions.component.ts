@@ -4,9 +4,9 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, HostBinding, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, input } from '@angular/core';
 
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
+import { convertToBoolProperty } from '../helpers';
 import { NbComponentSize } from '../component-size';
 import { NbComponentOrCustomStatus } from '../component-status';
 import { NbBadgePosition } from '../badge/badge.component';
@@ -16,30 +16,21 @@ import { NbIconConfig } from '../icon/icon.component';
  * Action item, display a link with an icon, or any other content provided instead.
  */
 @Component({
-    selector: 'nb-action',
-    styleUrls: ['./action.component.scss'],
-    template: `
-    <ng-container *ngIf="icon; else projectedContent">
-      <a class="icon-container"
-         [routerLink]="link"
-         [title]="title"
-         *ngIf="link">
-        <nb-icon [config]="icon"></nb-icon>
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-action',
+  styleUrls: ['./action.component.scss'],
+  template: `
+    <ng-container *ngIf="icon(); else projectedContent">
+      <a class="icon-container" [routerLink]="link()" [title]="title()" *ngIf="link()">
+        <nb-icon [config]="icon()"></nb-icon>
         <ng-container [ngTemplateOutlet]="badgeTemplate"></ng-container>
       </a>
-      <a class="icon-container"
-         [href]="href"
-         [title]="title"
-         *ngIf="href && !link">
-        <nb-icon [config]="icon"></nb-icon>
+      <a class="icon-container" [href]="href()" [title]="title()" *ngIf="href() && !link()">
+        <nb-icon [config]="icon()"></nb-icon>
         <ng-container [ngTemplateOutlet]="badgeTemplate"></ng-container>
       </a>
-      <a class="icon-container"
-         href="#"
-         [title]="title"
-         *ngIf="!href && !link"
-         (click)="$event.preventDefault()">
-        <nb-icon [config]="icon"></nb-icon>
+      <a class="icon-container" href="#" [title]="title()" *ngIf="!href() && !link()" (click)="$event.preventDefault()">
+        <nb-icon [config]="icon()"></nb-icon>
         <ng-container [ngTemplateOutlet]="badgeTemplate"></ng-container>
       </a>
     </ng-container>
@@ -49,83 +40,72 @@ import { NbIconConfig } from '../icon/icon.component';
       <ng-container [ngTemplateOutlet]="badgeTemplate"></ng-container>
     </ng-template>
     <ng-template #badgeTemplate>
-      <nb-badge *ngIf="badgeText || badgeDot"
-                [text]="badgeText"
-                [dotMode]="badgeDot"
-                [status]="badgeStatus"
-                [position]="badgePosition">
+      <nb-badge
+        *ngIf="badgeText() || badgeDot()"
+        [text]="badgeText()"
+        [dotMode]="badgeDot()"
+        [status]="badgeStatus()"
+        [position]="badgePosition()"
+      >
       </nb-badge>
     </ng-template>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbActionComponent {
-
   /**
    * Router link to use
    * @type string
    */
-  @Input() link: string;
+  readonly link = input<string>();
 
   /**
    * Regular HREF link
    * @type: string
    */
-  @Input() href: string;
+  readonly href = input<string>();
 
   /**
    * Optional title for mouseover
    * @type string
    */
-  @Input() title: string = '';
+  readonly title = input<string>('');
 
   /**
    * Icon name or config object
    * @type {string | NbIconConfig}
    */
-  @Input() icon: string | NbIconConfig;
+  readonly icon = input<string | NbIconConfig>();
 
   /**
    * Visually disables the item
    * @type boolean
    */
-  @Input()
+  readonly disabled = input(false, { transform: convertToBoolProperty });
+
   @HostBinding('class.disabled')
-  get disabled(): boolean {
-    return this._disabled;
+  get disabledClass(): boolean {
+    return this.disabled();
   }
-  set disabled(value: boolean) {
-    this._disabled = convertToBoolProperty(value);
-  }
-  protected _disabled: boolean = false;
-  static ngAcceptInputType_disabled: NbBooleanInput;
 
   /**
    * Use badge dot mode
    * @type boolean
    */
-  @Input()
-  get badgeDot(): boolean {
-    return this._badgeDot;
-  }
-  set badgeDot(value: boolean) {
-    this._badgeDot = convertToBoolProperty(value);
-  }
-  protected _badgeDot: boolean;
-  static ngAcceptInputType_badgeDot: NbBooleanInput;
+  readonly badgeDot = input(false, { transform: convertToBoolProperty });
 
   /**
    * Badge text to display
    * @type string
    */
-  @Input() badgeText: string;
+  readonly badgeText = input<string>();
 
   /**
    * Badge status (adds specific styles):
    * 'basic', 'primary', 'info', 'success', 'warning', 'danger', 'control'
    * @param {string} val
    */
-  @Input() badgeStatus: NbComponentOrCustomStatus = 'basic';
+  readonly badgeStatus = input<NbComponentOrCustomStatus>('basic');
 
   /**
    * Badge position.
@@ -134,7 +114,7 @@ export class NbActionComponent {
    * 'top start', 'top end', 'bottom start', 'bottom end'
    * @type string
    */
-  @Input() badgePosition: NbBadgePosition;
+  readonly badgePosition = input<NbBadgePosition>();
 }
 
 /**
@@ -213,63 +193,50 @@ export class NbActionComponent {
  * actions-giant-text-font-size:
  */
 @Component({
-    selector: 'nb-actions',
-    styleUrls: ['./actions.component.scss'],
-    template: `
-    <ng-content select="nb-action"></ng-content>
-  `,
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-actions',
+  styleUrls: ['./actions.component.scss'],
+  template: ` <ng-content select="nb-action"></ng-content> `,
+  standalone: false,
 })
 export class NbActionsComponent {
-
   /**
    * Size of the component: 'tiny', 'small' (default), 'medium', 'large', 'giant'
    */
-  @Input()
-  get size(): NbComponentSize {
-    return this._size;
-  }
-  set size(value: NbComponentSize) {
-    this._size = value;
-  }
-  protected _size: NbComponentSize = 'small';
+  readonly size = input<NbComponentSize>('small');
 
   /**
    * Component will fill full width of the container
    */
-  @Input()
+  readonly fullWidth = input(false, { transform: convertToBoolProperty });
+
   @HostBinding('class.full-width')
-  get fullWidth(): boolean {
-    return this._fullWidth;
+  get fullWidthClass(): boolean {
+    return this.fullWidth();
   }
-  set fullWidth(value: boolean) {
-    this._fullWidth = convertToBoolProperty(value);
-  }
-  protected _fullWidth: boolean = false;
-  static ngAcceptInputType_fullWidth: NbBooleanInput;
 
   @HostBinding('class.size-tiny')
   get tiny(): boolean {
-    return this.size === 'tiny';
+    return this.size() === 'tiny';
   }
 
   @HostBinding('class.size-small')
   get small(): boolean {
-    return this.size === 'small';
+    return this.size() === 'small';
   }
 
   @HostBinding('class.size-medium')
   get medium(): boolean {
-    return this.size === 'medium';
+    return this.size() === 'medium';
   }
 
   @HostBinding('class.size-large')
   get large(): boolean {
-    return this.size === 'large';
+    return this.size() === 'large';
   }
 
   @HostBinding('class.size-giant')
   get giant(): boolean {
-    return this.size === 'giant';
+    return this.size() === 'giant';
   }
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -16,15 +16,15 @@ import {
 } from '@nebular/theme';
 
 @Component({
-    selector: 'nb-toastr-test',
-    template: `
+  selector: 'nb-toastr-test',
+  template: `
     <nb-layout>
       <nb-layout-column>
         <div class="test-div"></div>
       </nb-layout-column>
     </nb-layout>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbToastrTestComponent {
   constructor(private toastrService: NbToastrService) {}
@@ -32,27 +32,29 @@ export class NbToastrTestComponent {
   showToast(className: string) {
     this.toastrService.show('testing toastr', '', { toastClass: className });
   }
+
+  showToastWithDuration(duration: number) {
+    this.toastrService.show('testing toastr', '', { duration });
+  }
 }
 
 describe('toastr-component', () => {
   let fixture: ComponentFixture<NbToastrTestComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [
-          RouterTestingModule.withRoutes([]),
-          NoopAnimationsModule,
-          NbThemeModule.forRoot(),
-          NbLayoutModule,
-          NbToastrModule.forRoot(),
-        ],
-        declarations: [NbToastrTestComponent],
-      }).compileComponents();
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        RouterTestingModule.withRoutes([]),
+        NoopAnimationsModule,
+        NbThemeModule.forRoot(),
+        NbLayoutModule,
+        NbToastrModule.forRoot(),
+      ],
+      declarations: [NbToastrTestComponent],
+    }).compileComponents();
 
-      fixture = TestBed.createComponent(NbToastrTestComponent);
-    }),
-  );
+    fixture = TestBed.createComponent(NbToastrTestComponent);
+  }));
 
   it("should add 'toastr-overlay-container' class to overlay", () => {
     fixture.debugElement.componentInstance.showToast('toast-test-class');
@@ -67,6 +69,17 @@ describe('toastr-component', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.toast-test-class')).toBeTruthy();
   });
+
+  it('should remove the toast from the DOM once its duration elapsed', fakeAsync(() => {
+    fixture.debugElement.componentInstance.showToastWithDuration(2000);
+    fixture.detectChanges();
+    expect(document.querySelectorAll('nb-toast').length).toEqual(1);
+
+    tick(2000);
+    fixture.detectChanges();
+
+    expect(document.querySelectorAll('nb-toast').length).toEqual(0);
+  }));
 });
 
 describe('toastr-service', () => {
@@ -242,12 +255,7 @@ describe('toastr-container-registry', () => {
   });
 
   beforeEach(() => {
-    toastrContainerRegistry = new NbToastrContainerRegistry(
-      overlayStub,
-      positionBuilder,
-      positionHelper,
-      documentStub,
-    );
+    toastrContainerRegistry = new NbToastrContainerRegistry(overlayStub, positionBuilder, positionHelper, documentStub);
   });
 
   it('should create new container if not exists for requested position', () => {
@@ -312,6 +320,9 @@ describe('toastr-container', () => {
     containerRefStub = {
       instance: {
         toasts: [],
+      },
+      setInput(name: string, value: unknown) {
+        this.instance[name] = value;
       },
       changeDetectorRef: {
         detectChanges() {},
