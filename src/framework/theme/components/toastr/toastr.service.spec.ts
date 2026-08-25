@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -31,6 +31,10 @@ export class NbToastrTestComponent {
 
   showToast(className: string) {
     this.toastrService.show('testing toastr', '', { toastClass: className });
+  }
+
+  showToastWithDuration(duration: number) {
+    this.toastrService.show('testing toastr', '', { duration });
   }
 }
 
@@ -65,6 +69,17 @@ describe('toastr-component', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.toast-test-class')).toBeTruthy();
   });
+
+  it('should remove the toast from the DOM once its duration elapsed', fakeAsync(() => {
+    fixture.debugElement.componentInstance.showToastWithDuration(2000);
+    fixture.detectChanges();
+    expect(document.querySelectorAll('nb-toast').length).toEqual(1);
+
+    tick(2000);
+    fixture.detectChanges();
+
+    expect(document.querySelectorAll('nb-toast').length).toEqual(0);
+  }));
 });
 
 describe('toastr-service', () => {
