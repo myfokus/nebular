@@ -24,9 +24,13 @@ Everything else in `src/framework` (`auth`, `moment`, `security`, `firebase-auth
 `icons`) is **left untouched at its Angular 21 state and is not built, tested or published**. It is
 kept only so the diff against upstream stays small. Do not assume it compiles.
 
-Versioning follows the upstream base: the fork is `17.2.0`, meaning "upstream 17.0.0 plus our
-compatibility changes". Keeping the major aligned with upstream is what makes "which release is this
-forked from?" answerable at a glance.
+**The major tracks the Angular major we target**, which is the convention upstream Nebular itself
+follows: Nebular 16 targets Angular 20, Nebular 17 targets Angular 21. This fork targets Angular 22,
+so it is `18.0.0` — the question a version has to answer here is "which Angular does this run on?".
+
+The fork is branched from upstream `v17.0.0` regardless of its own version; `LICENSE.txt` and the
+original copyright headers record the provenance. Note that `17.1.0`, the first published fork
+release, already targeted Angular 22 and so predates this rule.
 
 ## How this fork diverges from upstream
 
