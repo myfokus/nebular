@@ -255,6 +255,22 @@ cover on their own:
   mutating path and the menu views read item fields through computeds that depend on it. An
   application that mutates item fields in place itself should call `NbMenuService.refresh()`.
 
+### Writing specs against these components
+
+`fixture.detectChanges()` refreshes a view only if something marked it dirty. Assigning a plain
+field on a test host after creation marks nothing, so the template keeps rendering the old value
+and the assertion fails on a component that is actually correct — or, in dev mode, the write is
+caught one check later as an `NG0100`. Set the input instead:
+
+```ts
+fixture.componentRef.setInput('disableStepNavigation', true);
+fixture.detectChanges();
+```
+
+Writes made _before_ the first `detectChanges()` need none of this — the initial render picks them
+up. This is what most of the remaining upstream failures are: specs that assume a change-detection
+sweep they no longer get.
+
 ---
 
 # Nebular [<img src="https://i.imgur.com/oMcxwZ0.png" alt="Eva Design System" height="20px" />](https://eva.design?utm_campaign=eva_design%20-%20home%20-%20nebular%20github%20readme&utm_source=nebular&utm_medium=referral&utm_content=github_readme_hero_pic) [![npm](https://img.shields.io/npm/l/@nebular/theme.svg)]() [![npm](https://img.shields.io/npm/dt/@nebular/theme.svg)](https://www.npmjs.com/package/@nebular/theme) [![Codecov](https://img.shields.io/codecov/c/github/akveo/nebular/master.svg?style=flat-square)](https://codecov.io/gh/akveo/nebular/branch/master)
