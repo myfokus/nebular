@@ -6,10 +6,12 @@
 
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   HostBinding,
   Inject,
   Input,
+  input,
   OnDestroy,
   QueryList,
   EmbeddedViewRef,
@@ -21,11 +23,7 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 
 import { NB_WINDOW } from '../../theme.options';
 import { NbPlatform } from '../cdk/platform/platform-service';
-import {
-  NB_TABLE_TEMPLATE,
-  NbTable,
-  NB_TABLE_PROVIDERS,
-} from '../cdk/table/table.module';
+import { NB_TABLE_TEMPLATE, NbTable, NB_TABLE_PROVIDERS } from '../cdk/table/table.module';
 import { NbRowContext } from '../cdk/table/type-mappings';
 import { NbTreeGridDataSource, NbTreeGridDataSourceBuilder } from './data-source/tree-grid-data-source';
 import { NB_DEFAULT_ROW_LEVEL, NbTreeGridPresentationNode } from './data-source/tree-grid.model';
@@ -33,7 +31,7 @@ import { NbToggleOptions } from './data-source/tree-grid.service';
 import { NB_TREE_GRID } from './tree-grid-injection-tokens';
 import { NbTreeGridRowComponent } from './tree-grid-row.component';
 import { NbTreeGridCellDirective } from './tree-grid-cell.component';
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
+import { convertToBoolProperty } from '../helpers';
 import { NbTreeGridColumnDefDirective } from './tree-grid-column-def.directive';
 import {
   NbTreeGridFooterRowDefDirective,
@@ -129,23 +127,23 @@ import { NbColumnsService } from './tree-grid-columns.service';
  * tree-grid-sort-header-button-padding:
  */
 @Component({
-    selector: 'table[nbTreeGrid]',
-    template: NB_TABLE_TEMPLATE,
-    styleUrls: ['./tree-grid.component.scss'],
-    providers: [
-        { provide: NB_TREE_GRID, useExisting: NbTreeGridComponent },
-        { provide: CDK_TABLE, useExisting: NbTreeGridComponent },
-        NbColumnsService,
-        ...NB_TABLE_PROVIDERS,
-    ],
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'table[nbTreeGrid]',
+  template: NB_TABLE_TEMPLATE,
+  styleUrls: ['./tree-grid.component.scss'],
+  providers: [
+    { provide: NB_TREE_GRID, useExisting: NbTreeGridComponent },
+    { provide: CDK_TABLE, useExisting: NbTreeGridComponent },
+    NbColumnsService,
+    ...NB_TABLE_PROVIDERS,
+  ],
+  standalone: false,
 })
-export class NbTreeGridComponent<T> extends NbTable<NbTreeGridPresentationNode<T>>
-                                    implements AfterViewInit, OnDestroy {
-
-  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<T>,
-              platform: NbPlatform,
-              @Inject(NB_WINDOW) private window,
+export class NbTreeGridComponent<T> extends NbTable<NbTreeGridPresentationNode<T>> implements AfterViewInit, OnDestroy {
+  constructor(
+    private dataSourceBuilder: NbTreeGridDataSourceBuilder<T>,
+    platform: NbPlatform,
+    @Inject(NB_WINDOW) private window,
   ) {
     super();
     this.platform = platform;
@@ -173,20 +171,12 @@ export class NbTreeGridComponent<T> extends NbTable<NbTreeGridPresentationNode<T
     this.dataSource = this._source;
   }
 
-  @Input() levelPadding: string = '';
+  readonly levelPadding = input('');
 
   /**
    * Make all columns equal width. False by default.
    */
-  @Input()
-  set equalColumnsWidth(value: boolean) {
-    this.equalColumnsWidthValue = convertToBoolProperty(value);
-  }
-  get equalColumnsWidth(): boolean {
-    return this.equalColumnsWidthValue;
-  }
-  private equalColumnsWidthValue: boolean = false;
-  static ngAcceptInputType_equalColumnsWidth: NbBooleanInput;
+  readonly equalColumnsWidth = input(false, { transform: convertToBoolProperty });
 
   @HostBinding('class.nb-tree-grid') readonly treeClass = true;
 
@@ -197,8 +187,7 @@ export class NbTreeGridComponent<T> extends NbTable<NbTreeGridPresentationNode<T
       this._contentHeaderRowDefs.changes,
       this._contentFooterRowDefs.changes,
     );
-    rowsChange$.pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.checkDefsCount());
+    rowsChange$.pipe(takeUntil(this.destroy$)).subscribe(() => this.checkDefsCount());
 
     if (this.platform.isBrowser) {
       this.updateVisibleColumns();
@@ -227,7 +216,7 @@ export class NbTreeGridComponent<T> extends NbTable<NbTreeGridPresentationNode<T
   }
 
   getColumnWidth(): string {
-    if (this.equalColumnsWidth) {
+    if (this.equalColumnsWidth()) {
       return `${100 / this.getColumnsCount()}%`;
     }
     return '';
@@ -300,15 +289,15 @@ export class NbTreeGridComponent<T> extends NbTable<NbTreeGridPresentationNode<T
 
   private updateVisibleColumns(): void {
     const width = this.window.innerWidth;
-    const columnDefs = (this._contentColumnDefs as QueryList<NbTreeGridColumnDefDirective>);
+    const columnDefs = this._contentColumnDefs as QueryList<NbTreeGridColumnDefDirective>;
 
     const columnsToHide: string[] = columnDefs
       .filter((col: NbTreeGridColumnDefDirective) => col.shouldHide(width))
-      .map(col => col.name);
+      .map((col) => col.name);
 
     const columnsToShow: string[] = columnDefs
       .filter((col: NbTreeGridColumnDefDirective) => col.shouldShow(width))
-      .map(col => col.name);
+      .map((col) => col.name);
 
     if (!columnsToHide.length && !columnsToShow.length) {
       return;
@@ -318,7 +307,7 @@ export class NbTreeGridComponent<T> extends NbTable<NbTreeGridPresentationNode<T
       this._contentHeaderRowDefs.first as NbTreeGridHeaderRowDefDirective,
       this._contentRowDefs.first as NbTreeGridRowDefDirective<any>,
       this._contentFooterRowDefs.first as NbTreeGridFooterRowDefDirective,
-    ].filter(d => !!d);
+    ].filter((d) => !!d);
 
     for (const rowDef of rowDefs) {
       for (const column of columnsToHide) {

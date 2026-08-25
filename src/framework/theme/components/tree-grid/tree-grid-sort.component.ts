@@ -5,6 +5,7 @@
  */
 
 import {
+  ChangeDetectionStrategy,
   Component,
   ContentChild,
   Directive,
@@ -13,11 +14,13 @@ import {
   HostListener,
   Inject,
   Input,
+  input,
   Output,
+  signal,
   TemplateRef,
 } from '@angular/core';
 
-import { convertToBoolProperty, NbBooleanInput, NbNullableInput } from '../helpers';
+import { convertToBoolProperty, NbNullableInput } from '../helpers';
 import { NB_SORT_HEADER_COLUMN_DEF } from '../cdk/table/cell';
 
 /** Column definition associated with a `NbSortHeaderDirective`. */
@@ -40,18 +43,14 @@ export enum NbSortDirection {
   DESCENDING = 'desc',
   NONE = '',
 }
-const sortDirections: NbSortDirection[] = [
-  NbSortDirection.ASCENDING,
-  NbSortDirection.DESCENDING,
-  NbSortDirection.NONE,
-];
+const sortDirections: NbSortDirection[] = [NbSortDirection.ASCENDING, NbSortDirection.DESCENDING, NbSortDirection.NONE];
 
 /**
  * Directive triggers sort method of passed object when sort header changes direction
  */
 @Directive({
-    selector: '[nbSort]',
-    standalone: false
+  selector: '[nbSort]',
+  standalone: false,
 })
 export class NbSortDirective {
   @Input('nbSort') sortable: NbSortable;
@@ -80,30 +79,31 @@ export interface NbSortHeaderIconDirectiveContext {
  * `isDescending` and `isNone` properties.
  */
 @Directive({
-    selector: '[nbSortHeaderIcon]',
-    standalone: false
+  selector: '[nbSortHeaderIcon]',
+  standalone: false,
 })
 export class NbSortHeaderIconDirective {}
 
 @Component({
-    selector: 'nb-sort-icon',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-sort-icon',
+  template: `
     <ng-container *ngIf="isDirectionSet()">
       <nb-icon *ngIf="isAscending()" icon="chevron-down-outline" pack="nebular-essentials" aria-hidden="true"></nb-icon>
       <nb-icon *ngIf="isDescending()" icon="chevron-up-outline" pack="nebular-essentials" aria-hidden="true"></nb-icon>
     </ng-container>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbSortIconComponent {
-  @Input() direction: NbSortDirection = NbSortDirection.NONE;
+  readonly direction = input(NbSortDirection.NONE);
 
   isAscending(): boolean {
-    return this.direction === NbSortDirection.ASCENDING;
+    return this.direction() === NbSortDirection.ASCENDING;
   }
 
   isDescending(): boolean {
-    return this.direction === NbSortDirection.DESCENDING;
+    return this.direction() === NbSortDirection.DESCENDING;
   }
 
   isDirectionSet(): boolean {
@@ -115,50 +115,54 @@ export class NbSortIconComponent {
  * Marks header as sort header so it emitting sort event when clicked.
  */
 @Component({
-    selector: '[nbSortHeader]',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: '[nbSortHeader]',
+  template: `
     <button
       class="nb-tree-grid-header-change-sort-button"
       type="button"
       [attr.disabled]="getDisabledAttributeValue()"
-      (click)="sortData()">
+      (click)="sortData()"
+    >
       <ng-content></ng-content>
     </button>
     <nb-sort-icon *ngIf="!sortIcon; else customIcon" [direction]="direction"></nb-sort-icon>
     <ng-template #customIcon [ngTemplateOutlet]="sortIcon" [ngTemplateOutletContext]="getIconContext()"></ng-template>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbSortHeaderComponent {
-
   @ContentChild(NbSortHeaderIconDirective, { read: TemplateRef })
   sortIcon: TemplateRef<NbSortHeaderIconDirectiveContext>;
+
+  private readonly _direction = signal(NbSortDirection.NONE);
 
   /**
    * Current sort direction. Possible values: `asc`, `desc`, ``(none)
    * @type {NbSortDirection}
    */
-  @Input('nbSortHeader') direction: NbSortDirection;
+  @Input('nbSortHeader')
+  get direction(): NbSortDirection {
+    return this._direction();
+  }
+  set direction(value: NbSortDirection) {
+    this._direction.set(value);
+  }
   static ngAcceptInputType_direction: NbSortDirectionValues;
-
-  private disabledValue: boolean = false;
 
   /**
    * Disable sort header
    */
-  @Input()
+  readonly disabled = input(false, { transform: convertToBoolProperty });
+
   @HostBinding('class.disabled')
-  set disabled(value) {
-    this.disabledValue = convertToBoolProperty(value);
+  get disabledClass(): boolean {
+    return this.disabled();
   }
-  get disabled(): boolean {
-    return this.disabledValue;
-  }
-  static ngAcceptInputType_disabled: NbBooleanInput;
 
   @HostListener('click')
   sortIfEnabled() {
-    if (!this.disabled) {
+    if (!this.disabled()) {
       this.sortData();
     }
   }
@@ -191,7 +195,7 @@ export class NbSortHeaderComponent {
   }
 
   getDisabledAttributeValue(): '' | null {
-    return this.disabled ? '' : null;
+    return this.disabled() ? '' : null;
   }
 
   private createSortRequest(): NbSortRequest {
