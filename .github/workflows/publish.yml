@@ -23,8 +23,11 @@ jobs:
         with:
           # Trusted publishing needs Node >= 22.14.0; .nvmrc pins 22.22.3.
           node-version-file: .nvmrc
-          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
+          # Deliberately no registry-url: it makes setup-node write an .npmrc line
+          # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}`, and with no token in the
+          # environment that resolves to an empty credential which npm sends instead of
+          # exchanging the OIDC token. npmjs.org is the default registry anyway.
 
       # Trusted publishing needs npm >= 11.5.1, which is newer than the npm bundled with Node 22.
       # Pinned to the 11 line so a future npm major cannot silently change OIDC behaviour, and so
@@ -33,7 +36,11 @@ jobs:
 
       - run: npm ci
 
+      # Only a tag carries a version to check. A manual run is the escape hatch for releasing
+      # whatever version the checked-out ref holds, and doubles as the way to prove the
+      # trusted-publishing credentials work without cutting a tag.
       - name: Check the tag matches the package version
+        if: github.event_name == 'push'
         run: |
           tag_version="${GITHUB_REF_NAME#myfokus-v}"
           package_version="$(node -p "require('./src/framework/theme/package.json').version")"
