@@ -1,12 +1,12 @@
-import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, Input, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NbStepComponent, NbStepperComponent, NbStepperModule, NbThemeModule } from '@nebular/theme';
 
 @Component({
-    selector: 'nb-step-changed-test',
-    template: `
-    <nb-stepper [selectedIndex]="1">
+  selector: 'nb-step-changed-test',
+  template: `
+    <nb-stepper [selectedIndex]="1" [disableStepNavigation]="disableStepNavigation">
       <nb-step [label]="labelOne">
         <ng-template #labelOne>First step</ng-template>
       </nb-step>
@@ -20,11 +20,13 @@ import { NbStepComponent, NbStepperComponent, NbStepperModule, NbThemeModule } f
       </nb-step>
     </nb-stepper>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbStepChangeTestComponent {
   @ViewChild(NbStepperComponent) stepper: NbStepperComponent;
   @ViewChildren(NbStepComponent) steps: QueryList<NbStepComponent>;
+
+  @Input() disableStepNavigation = false;
 }
 
 describe('Stepper: Step Change', () => {
@@ -65,7 +67,9 @@ describe('Stepper: Step Change', () => {
 
   it('should not emit step change if navigation is disabled', () => {
     stepper.stepChange.subscribe(stepChangeSpy);
-    stepper.disableStepNavigation = true;
+    // setInput marks the host dirty; a plain field write would leave the host template unrefreshed
+    fixture.componentRef.setInput('disableStepNavigation', true);
+    fixture.detectChanges();
     const step = fixture.debugElement.query(By.css('.step'));
     step.triggerEventHandler('click', null);
 
@@ -126,11 +130,11 @@ describe('Component: NbStepper', () => {
   });
 
   it('should set class horizontal', () => {
-    stepper.orientation = 'horizontal';
+    fixture.componentRef.setInput('orientation', 'horizontal');
     fixture.detectChanges();
     expect(fixture.debugElement.nativeElement.classList.contains('horizontal')).toBeTruthy();
 
-    stepper.orientation = 'vertical';
+    fixture.componentRef.setInput('orientation', 'vertical');
     fixture.detectChanges();
     expect(fixture.debugElement.nativeElement.classList.contains('vertical')).toBeTruthy();
   });
