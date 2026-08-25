@@ -4,7 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, HostBinding, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, input } from '@angular/core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
 import { NbStatusService } from '../../services/status.service';
@@ -12,7 +12,6 @@ import { NbComponentOrCustomStatus } from '../component-status';
 import { NbRenderableContainer } from '../cdk/overlay/overlay-container';
 import { NbPosition } from '../cdk/overlay/overlay-position';
 import { NbIconConfig } from '../icon/icon.component';
-
 
 /**
  * Tooltip container.
@@ -58,43 +57,36 @@ import { NbIconConfig } from '../icon/icon.component';
  * tooltip-shadow:
  */
 @Component({
-    selector: 'nb-tooltip',
-    styleUrls: ['./tooltip.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-tooltip',
+  styleUrls: ['./tooltip.component.scss'],
+  template: `
     <span class="arrow"></span>
     <div class="content">
-      <nb-icon *ngIf="context?.icon" [config]="context.icon"></nb-icon>
-      <span *ngIf="content">{{ content }}</span>
+      <nb-icon *ngIf="context()?.icon" [config]="context().icon"></nb-icon>
+      <span *ngIf="content()">{{ content() }}</span>
     </div>
   `,
-    animations: [
-        trigger('showTooltip', [
-            state('in', style({ opacity: 1 })),
-            transition('void => *', [
-                style({ opacity: 0 }),
-                animate(100),
-            ]),
-            transition('* => void', [
-                animate(100, style({ opacity: 0 })),
-            ]),
-        ]),
-    ],
-    standalone: false
+  animations: [
+    trigger('showTooltip', [
+      state('in', style({ opacity: 1 })),
+      transition('void => *', [style({ opacity: 0 }), animate(100)]),
+      transition('* => void', [animate(100, style({ opacity: 0 }))]),
+    ]),
+  ],
+  standalone: false,
 })
 export class NbTooltipComponent implements NbRenderableContainer {
-
-  @Input()
-  content: string;
+  readonly content = input<string>();
 
   /**
    * Popover position relatively host element.
    * */
-  @Input()
-  position: NbPosition = NbPosition.TOP;
+  readonly position = input<NbPosition>(NbPosition.TOP);
 
   @HostBinding('class')
   get binding() {
-    return `${this.position} ${this.statusClass}`;
+    return `${this.position()} ${this.statusClass}`;
   }
 
   @HostBinding('@showTooltip')
@@ -102,19 +94,17 @@ export class NbTooltipComponent implements NbRenderableContainer {
     return true;
   }
 
-  @Input()
-  context: { icon?: string | NbIconConfig, status?: NbComponentOrCustomStatus } = {};
+  readonly context = input<{ icon?: string | NbIconConfig; status?: NbComponentOrCustomStatus }>({});
 
   get statusClass() {
-    if (this.context.status) {
-      return this.statusService.getStatusClass(this.context.status);
+    if (this.context()?.status) {
+      return this.statusService.getStatusClass(this.context().status);
     }
 
     return '';
   }
 
-  constructor(protected statusService: NbStatusService) {
-  }
+  constructor(protected statusService: NbStatusService) {}
 
   /**
    * The method is empty since we don't need to do anything additionally
