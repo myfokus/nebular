@@ -5,12 +5,13 @@
  */
 
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
   HostBinding,
   HostListener,
-  Input,
+  input,
   OnDestroy,
   OnInit,
   Output,
@@ -90,61 +91,61 @@ import { NbToast } from './model';
  * toastr-destroyable-control-hover-border-color:
  * */
 @Component({
-    selector: 'nb-toast',
-    styleUrls: ['./toast.component.scss'],
-    templateUrl: './toast.component.html',
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-toast',
+  styleUrls: ['./toast.component.scss'],
+  templateUrl: './toast.component.html',
+  standalone: false,
 })
 export class NbToastComponent implements OnInit, OnDestroy {
-  @Input()
-  toast: NbToast;
+  readonly toast = input.required<NbToast>();
 
   @Output() destroy: EventEmitter<void> = new EventEmitter();
   @Output() toastClick: EventEmitter<void> = new EventEmitter();
 
   @HostBinding('class.status-success')
   get success(): boolean {
-    return this.toast.config.status === 'success';
+    return this.toast().config.status === 'success';
   }
 
   @HostBinding('class.status-info')
   get info(): boolean {
-    return this.toast.config.status === 'info';
+    return this.toast().config.status === 'info';
   }
 
   @HostBinding('class.status-warning')
   get warning(): boolean {
-    return this.toast.config.status === 'warning';
+    return this.toast().config.status === 'warning';
   }
 
   @HostBinding('class.status-primary')
   get primary(): boolean {
-    return this.toast.config.status === 'primary';
+    return this.toast().config.status === 'primary';
   }
 
   @HostBinding('class.status-danger')
   get danger(): boolean {
-    return this.toast.config.status === 'danger';
+    return this.toast().config.status === 'danger';
   }
 
   @HostBinding('class.status-basic')
   get basic(): boolean {
-    return this.toast.config.status === 'basic';
+    return this.toast().config.status === 'basic';
   }
 
   @HostBinding('class.status-control')
   get control(): boolean {
-    return this.toast.config.status === 'control';
+    return this.toast().config.status === 'control';
   }
 
   @HostBinding('class.destroy-by-click')
   get destroyByClick(): boolean {
-    return this.toast.config.destroyByClick;
+    return this.toast().config.destroyByClick;
   }
 
   @HostBinding('class.has-icon')
   get hasIcon(): boolean {
-    const { icon } = this.toast.config;
+    const { icon } = this.toast().config;
     if (typeof icon === 'string') {
       return true;
     }
@@ -158,13 +159,13 @@ export class NbToastComponent implements OnInit, OnDestroy {
   }
 
   get icon(): string | NbIconConfig {
-    return this.toast.config.icon;
+    return this.toast().config.icon;
   }
 
   @HostBinding('class')
   get additionalClasses(): string[] {
-    if (this.statusService.isCustomStatus(this.toast.config.status)) {
-      return [this.statusService.getStatusClass(this.toast.config.status)];
+    if (this.statusService.isCustomStatus(this.toast().config.status)) {
+      return [this.statusService.getStatusClass(this.toast().config.status)];
     }
     return [];
   }
@@ -181,8 +182,8 @@ export class NbToastComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    if (this.toast.config.toastClass) {
-      this.renderer.addClass(this.elementRef.nativeElement, this.toast.config.toastClass);
+    if (this.toast().config.toastClass) {
+      this.renderer.addClass(this.elementRef.nativeElement, this.toast().config.toastClass);
     }
   }
 

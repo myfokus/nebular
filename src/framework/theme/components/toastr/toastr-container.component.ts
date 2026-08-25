@@ -4,10 +4,9 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, Input, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, QueryList, ViewChildren } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 
 import { NbToastComponent } from './toast.component';
 import { NbToast } from './model';
@@ -26,52 +25,39 @@ const voidState = style({
 const defaultOptions = { params: { direction: '' } };
 
 @Component({
-    selector: 'nb-toastr-container',
-    template: `
-    <nb-toast [@fadeIn]="fadeIn" *ngFor="let toast of content" [toast]="toast"></nb-toast>`,
-    animations: [
-        trigger('fadeIn', [
-            transition(':enter', [voidState, animate(100)], defaultOptions),
-            transition(':leave', [animate(100, voidState)], defaultOptions),
-        ]),
-    ],
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-toastr-container',
+  template: ` <nb-toast [@fadeIn]="fadeIn()" *ngFor="let toast of content()" [toast]="toast"></nb-toast>`,
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [voidState, animate(100)], defaultOptions),
+      transition(':leave', [animate(100, voidState)], defaultOptions),
+    ]),
+  ],
+  standalone: false,
 })
-export class NbToastrContainerComponent implements OnInit, OnDestroy {
+export class NbToastrContainerComponent {
+  protected readonly layoutDirection = inject(NbLayoutDirectionService);
+  protected readonly positionHelper = inject(NbPositionHelper);
 
-  protected destroy$ = new Subject<void>();
+  readonly content = input<NbToast[]>([]);
 
-  @Input()
-  content: NbToast[] = [];
+  readonly context = input<Object>();
 
-  @Input()
-  context: Object;
-
-  @Input()
-  position: NbGlobalPosition;
+  readonly position = input<NbGlobalPosition>();
 
   @ViewChildren(NbToastComponent)
   toasts: QueryList<NbToastComponent>;
 
-  fadeIn;
+  protected readonly direction = toSignal(this.layoutDirection.onDirectionChange(), {
+    initialValue: this.layoutDirection.getDirection(),
+  });
 
-  constructor(protected layoutDirection: NbLayoutDirectionService,
-              protected positionHelper: NbPositionHelper) {
-  }
-
-  ngOnInit() {
-    this.layoutDirection.onDirectionChange()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.onDirectionChange());
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  protected onDirectionChange() {
-    const direction = this.positionHelper.isRightPosition(this.position) ? '' : '-';
-    this.fadeIn = { value: '', params: { direction } };
-  }
+  protected readonly fadeIn = computed(() => {
+    // isRightPosition resolves logical positions through the layout direction, so the direction
+    // signal is read to recompute on direction changes even though its value is not used directly.
+    this.direction();
+    const direction = this.positionHelper.isRightPosition(this.position()) ? '' : '-';
+    return { value: '', params: { direction } };
+  });
 }

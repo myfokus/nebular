@@ -1,9 +1,9 @@
 import {
-  ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostBinding,
-  Inject,
+  inject,
   OnDestroy,
   OnInit,
   TemplateRef,
@@ -12,7 +12,8 @@ import {
   Type,
   AfterViewChecked,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import { NbFocusTrap, NbFocusTrapFactoryService } from '../cdk/a11y/focus-trap';
 import { NbComponentPortal, NbComponentType, NbTemplatePortal } from '../cdk/overlay/mapping';
 import { NbOverlayContainerComponent } from '../cdk/overlay/overlay-container';
@@ -20,8 +21,9 @@ import { NB_WINDOW_CONTENT, NbWindowConfig, NbWindowState, NB_WINDOW_CONTEXT } f
 import { NbWindowRef } from './window-ref';
 
 @Component({
-    selector: 'nb-window',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-window',
+  template: `
     <nb-card>
       <nb-card-header>
         <div *ngIf="config.titleTemplate; else textTitleTemplate" cdkFocusInitial tabindex="-1">
@@ -65,23 +67,37 @@ import { NbWindowRef } from './window-ref';
       </nb-card-body>
     </nb-card>
   `,
-    styleUrls: ['./window.component.scss'],
-    standalone: false
+  styleUrls: ['./window.component.scss'],
+  standalone: false,
 })
 export class NbWindowComponent implements OnInit, AfterViewChecked, OnDestroy {
+  public readonly content: TemplateRef<any> | NbComponentType = inject(NB_WINDOW_CONTENT);
+  public readonly context: Object = inject(NB_WINDOW_CONTEXT);
+  public readonly windowRef: NbWindowRef = inject(NbWindowRef);
+  public readonly config: NbWindowConfig = inject(NbWindowConfig);
+  protected readonly focusTrapFactory = inject(NbFocusTrapFactoryService);
+  protected readonly elementRef = inject(ElementRef);
+  protected readonly renderer = inject(Renderer2);
+
+  // The template and host classes render from windowRef.state, which changes outside of any
+  // input binding, so the OnPush view reads it through a signal to be re-checked on state changes.
+  protected readonly state = toSignal(this.windowRef.stateChange.pipe(map((change) => change.newState)), {
+    initialValue: this.windowRef.state,
+  });
+
   @HostBinding('class.full-screen')
   get isFullScreen() {
-    return this.windowRef.state === NbWindowState.FULL_SCREEN;
+    return this.state() === NbWindowState.FULL_SCREEN;
   }
 
   @HostBinding('class.maximized')
   get maximized() {
-    return this.windowRef.state === NbWindowState.MAXIMIZED;
+    return this.state() === NbWindowState.MAXIMIZED;
   }
 
   @HostBinding('class.minimized')
   get minimized() {
-    return this.windowRef.state === NbWindowState.MINIMIZED;
+    return this.state() === NbWindowState.MINIMIZED;
   }
 
   get showMinimize(): boolean {
@@ -104,26 +120,7 @@ export class NbWindowComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   protected focusTrap: NbFocusTrap;
 
-  constructor(
-    @Inject(NB_WINDOW_CONTENT) public content: TemplateRef<any> | NbComponentType,
-    @Inject(NB_WINDOW_CONTEXT) public context: Object,
-    public windowRef: NbWindowRef,
-    public config: NbWindowConfig,
-    protected focusTrapFactory: NbFocusTrapFactoryService,
-    protected elementRef: ElementRef,
-    protected renderer: Renderer2,
-    protected cd: ChangeDetectorRef,
-  ) {}
-
-  protected stateChangeSubscription: Subscription;
-
   ngOnInit() {
-    // The template decides whether to render the card body from windowRef.state through getters,
-    // so a state change tells Angular nothing on its own. Under Angular 22 that is no longer
-    // enough: a detectChanges() on this component's ComponentRef only refreshes the view if it
-    // has been marked, so minimizing and restoring left the body as it was first rendered.
-    this.stateChangeSubscription = this.windowRef.stateChange.subscribe(() => this.cd.markForCheck());
-
     this.focusTrap = this.focusTrapFactory.create(this.elementRef.nativeElement);
     this.focusTrap.blurPreviouslyFocusedElement();
     this.focusTrap.focusInitialElement();
@@ -146,10 +143,6 @@ export class NbWindowComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.stateChangeSubscription) {
-      this.stateChangeSubscription.unsubscribe();
-    }
-
     if (this.focusTrap) {
       this.focusTrap.restoreFocus();
     }
