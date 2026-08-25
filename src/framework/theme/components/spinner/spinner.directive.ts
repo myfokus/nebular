@@ -4,15 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import {
-  ComponentRef,
-  Directive,
-  ElementRef,
-  Input,
-  Renderer2,
-  ViewContainerRef,
-  HostBinding,
-} from '@angular/core';
+import { ComponentRef, Directive, ElementRef, Input, Renderer2, ViewContainerRef, HostBinding } from '@angular/core';
 
 import { NbComponentSize } from '../component-size';
 import { NbComponentOrCustomStatus } from '../component-status';
@@ -59,11 +51,10 @@ import { NbSpinnerComponent } from './spinner.component';
  * @stacked-example(Spinner in tabs, spinner/spinner-tabs.component)
  */
 @Directive({
-    selector: '[nbSpinner]',
-    standalone: false
+  selector: '[nbSpinner]',
+  standalone: false,
 })
 export class NbSpinnerDirective {
-
   spinner: ComponentRef<NbSpinnerComponent>;
 
   /**
@@ -98,10 +89,11 @@ export class NbSpinnerDirective {
 
   @HostBinding('class.nb-spinner-container') isSpinnerExist = false;
 
-  constructor(private directiveView: ViewContainerRef,
-              private renderer: Renderer2,
-              private directiveElement: ElementRef) {
-  }
+  constructor(
+    private directiveView: ViewContainerRef,
+    private renderer: Renderer2,
+    private directiveElement: ElementRef,
+  ) {}
 
   hide() {
     if (this.isSpinnerExist) {
@@ -113,16 +105,16 @@ export class NbSpinnerDirective {
   show() {
     if (!this.isSpinnerExist) {
       this.spinner = this.directiveView.createComponent(NbSpinnerComponent);
-      this.setInstanceInputs(this.spinner.instance);
+      this.setInstanceInputs(this.spinner);
       this.spinner.changeDetectorRef.detectChanges();
       this.renderer.appendChild(this.directiveElement.nativeElement, this.spinner.location.nativeElement);
       this.isSpinnerExist = true;
     }
   }
 
-  setInstanceInputs(instance: NbSpinnerComponent) {
-    instance.message = this.spinnerMessage
-    typeof this.spinnerStatus !== 'undefined' && (instance.status = this.spinnerStatus);
-    typeof this.spinnerSize !== 'undefined' && (instance.size = this.spinnerSize);
+  setInstanceInputs(spinner: ComponentRef<NbSpinnerComponent>) {
+    spinner.setInput('message', this.spinnerMessage);
+    typeof this.spinnerStatus !== 'undefined' && spinner.setInput('status', this.spinnerStatus);
+    typeof this.spinnerSize !== 'undefined' && spinner.setInput('size', this.spinnerSize);
   }
 }

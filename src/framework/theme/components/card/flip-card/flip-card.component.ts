@@ -1,4 +1,4 @@
-import { Component, Input, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, input, model } from '@angular/core';
 
 /**
  *
@@ -56,42 +56,46 @@ import { Component, Input, HostBinding } from '@angular/core';
  *
  */
 @Component({
-    selector: 'nb-flip-card',
-    styleUrls: ['./flip-card.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-flip-card',
+  styleUrls: ['./flip-card.component.scss'],
+  template: `
     <div class="flipcard-body">
       <div class="front-container">
         <ng-content select="nb-card-front"></ng-content>
-        <a *ngIf="showToggleButton" class="flip-button" (click)="toggle()">
+        <a *ngIf="showToggleButton()" class="flip-button" (click)="toggle()">
           <nb-icon icon="chevron-left-outline" pack="nebular-essentials" aria-hidden="true"></nb-icon>
         </a>
       </div>
       <div class="back-container">
         <ng-content select="nb-card-back"></ng-content>
-        <a *ngIf="showToggleButton" class="flip-button" (click)="toggle()">
+        <a *ngIf="showToggleButton()" class="flip-button" (click)="toggle()">
           <nb-icon icon="chevron-left-outline" pack="nebular-essentials" aria-hidden="true"></nb-icon>
         </a>
       </div>
     </div>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbFlipCardComponent {
   /**
    * Flip state
    * @type boolean
    */
-  @Input()
-  @HostBinding('class.flipped')
-  flipped: boolean = false;
+  readonly flipped = model(false);
 
   /**
    * Show/hide toggle button to be able to control toggle from your code
    * @type {boolean}
    */
-  @Input() showToggleButton = true;
+  readonly showToggleButton = input(true);
+
+  @HostBinding('class.flipped')
+  get flippedClass(): boolean {
+    return this.flipped();
+  }
 
   toggle() {
-    this.flipped = !this.flipped;
+    this.flipped.update((flipped) => !flipped);
   }
 }

@@ -4,7 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, Input, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, inject, input } from '@angular/core';
 
 import { NbStatusService } from '../../services/status.service';
 import { NbComponentSize } from '../component-size';
@@ -37,36 +37,36 @@ import { NbComponentOrCustomStatus, NbComponentStatus } from '../component-statu
  * card-header-control-text-color:
  */
 @Component({
-    selector: 'nb-card-header',
-    template: `<ng-content></ng-content>`,
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-card-header',
+  template: `<ng-content></ng-content>`,
+  standalone: false,
 })
-export class NbCardHeaderComponent {
-}
+export class NbCardHeaderComponent {}
 
 /**
  * Component intended to be used within  the `<nb-card>` component.
  * Adds styles for a preset body section.
  */
 @Component({
-    selector: 'nb-card-body',
-    template: `<ng-content></ng-content>`,
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-card-body',
+  template: `<ng-content></ng-content>`,
+  standalone: false,
 })
-export class NbCardBodyComponent {
-}
+export class NbCardBodyComponent {}
 
 /**
  * Component intended to be used within  the `<nb-card>` component.
  * Adds styles for a preset footer section.
  */
 @Component({
-    selector: 'nb-card-footer',
-    template: `<ng-content></ng-content>`,
-    standalone: false
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-card-footer',
+  template: `<ng-content></ng-content>`,
+  standalone: false,
 })
-export class NbCardFooterComponent {
-}
+export class NbCardFooterComponent {}
 
 /**
  * Basic content container component.
@@ -149,153 +149,148 @@ export class NbCardFooterComponent {
  * card-scrollbar-width:
  */
 @Component({
-    selector: 'nb-card',
-    styleUrls: ['./card.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-card',
+  styleUrls: ['./card.component.scss'],
+  template: `
     <ng-content select="nb-card-header"></ng-content>
     <ng-content select="nb-card-body"></ng-content>
     <ng-content></ng-content>
     <ng-content select="nb-card-footer"></ng-content>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbCardComponent {
+  protected readonly statusService = inject(NbStatusService);
 
   /**
    * Card size, available sizes:
    * tiny, small, medium, large, giant
    */
-  @Input()
-  get size(): '' | NbComponentSize {
-    return this._size;
+  readonly size = input<'' | NbComponentSize>('');
+
+  /** @deprecated read the `size` input signal instead */
+  get _size(): '' | NbComponentSize {
+    return this.size();
   }
-  set size(value: '' | NbComponentSize) {
-    this._size = value;
-  }
-  _size: '' | NbComponentSize = '';
 
   /**
    * Card status:
    * `basic`, `primary`, `info`, `success`, `warning`, `danger`, `control`
    */
-  @Input()
-  status: '' | NbComponentOrCustomStatus = '';
+  readonly status = input<'' | NbComponentOrCustomStatus>('');
 
   /**
    * Card accent (color of the top border):
    * `basic`, `primary`, `info`, `success`, `warning`, `danger`, `control`
    */
-  @Input()
-  accent: '' | NbComponentStatus = '';
+  readonly accent = input<'' | NbComponentStatus>('');
 
   @HostBinding('class.size-tiny')
   get tiny() {
-    return this.size === 'tiny';
+    return this.size() === 'tiny';
   }
 
   @HostBinding('class.size-small')
   get small() {
-    return this.size === 'small';
+    return this.size() === 'small';
   }
 
   @HostBinding('class.size-medium')
   get medium() {
-    return this.size === 'medium';
+    return this.size() === 'medium';
   }
 
   @HostBinding('class.size-large')
   get large() {
-    return this.size === 'large';
+    return this.size() === 'large';
   }
 
   @HostBinding('class.size-giant')
   get giant() {
-    return this.size === 'giant';
+    return this.size() === 'giant';
   }
 
   @HostBinding('class.status-primary')
   get primary() {
-    return this.status === 'primary';
+    return this.status() === 'primary';
   }
 
   @HostBinding('class.status-info')
   get info() {
-    return this.status === 'info';
+    return this.status() === 'info';
   }
 
   @HostBinding('class.status-success')
   get success() {
-    return this.status === 'success';
+    return this.status() === 'success';
   }
 
   @HostBinding('class.status-warning')
   get warning() {
-    return this.status === 'warning';
+    return this.status() === 'warning';
   }
 
   @HostBinding('class.status-danger')
   get danger() {
-    return this.status === 'danger';
+    return this.status() === 'danger';
   }
 
   @HostBinding('class.status-basic')
   get basic() {
-    return this.status === 'basic';
+    return this.status() === 'basic';
   }
 
   @HostBinding('class.status-control')
   get control() {
-    return this.status === 'control';
+    return this.status() === 'control';
   }
 
   @HostBinding('class.accent')
   get hasAccent() {
-    return this.accent;
+    return this.accent();
   }
 
   @HostBinding('class.accent-primary')
   get primaryAccent() {
-    return this.accent === 'primary';
+    return this.accent() === 'primary';
   }
 
   @HostBinding('class.accent-info')
   get infoAccent() {
-    return this.accent === 'info';
+    return this.accent() === 'info';
   }
 
   @HostBinding('class.accent-success')
   get successAccent() {
-    return this.accent === 'success';
+    return this.accent() === 'success';
   }
 
   @HostBinding('class.accent-warning')
   get warningAccent() {
-    return this.accent === 'warning';
+    return this.accent() === 'warning';
   }
 
   @HostBinding('class.accent-danger')
   get dangerAccent() {
-    return this.accent === 'danger';
+    return this.accent() === 'danger';
   }
 
   @HostBinding('class.accent-basic')
   get basicAccent() {
-    return this.accent === 'basic';
+    return this.accent() === 'basic';
   }
 
   @HostBinding('class.accent-control')
   get controlAccent() {
-    return this.accent === 'control';
+    return this.accent() === 'control';
   }
 
   @HostBinding('class')
   get additionalClasses(): string[] {
-    if (this.statusService.isCustomStatus(this.status)) {
-      return [this.statusService.getStatusClass(this.status)];
+    if (this.statusService.isCustomStatus(this.status())) {
+      return [this.statusService.getStatusClass(this.status())];
     }
     return [];
-  }
-
-  constructor(protected statusService: NbStatusService) {
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, input, model } from '@angular/core';
 
 /**
  *
@@ -55,35 +55,39 @@ import { Component, Input, HostBinding } from '@angular/core';
  * @additional-example(Multiple Sizes, reveal-card/reveal-card-sizes.component)
  */
 @Component({
-    selector: 'nb-reveal-card',
-    styleUrls: ['./reveal-card.component.scss'],
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-reveal-card',
+  styleUrls: ['./reveal-card.component.scss'],
+  template: `
     <ng-content select="nb-card-front"></ng-content>
     <div class="second-card-container">
       <ng-content select="nb-card-back"></ng-content>
     </div>
-    <a *ngIf="showToggleButton" class="reveal-button" (click)="toggle()">
+    <a *ngIf="showToggleButton()" class="reveal-button" (click)="toggle()">
       <nb-icon icon="chevron-down-outline" pack="nebular-essentials" aria-hidden="true"></nb-icon>
     </a>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbRevealCardComponent {
   /**
    * Reveal state
    * @type boolean
    */
-  @Input()
-  @HostBinding('class.revealed')
-  revealed: boolean = false;
+  readonly revealed = model(false);
 
   /**
    * Show/hide toggle button to be able to control toggle from your code
    * @type {boolean}
    */
-  @Input() showToggleButton = true;
+  readonly showToggleButton = input(true);
+
+  @HostBinding('class.revealed')
+  get revealedClass(): boolean {
+    return this.revealed();
+  }
 
   toggle() {
-    this.revealed = !this.revealed;
+    this.revealed.update((revealed) => !revealed);
   }
 }

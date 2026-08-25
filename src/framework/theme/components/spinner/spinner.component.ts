@@ -4,7 +4,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, HostBinding, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, inject, input } from '@angular/core';
 
 import { NbStatusService } from '../../services/status.service';
 import { NbComponentSize } from '../component-size';
@@ -48,105 +48,102 @@ import { NbComponentOrCustomStatus } from '../component-status';
  * spinner-height-giant:
  */
 @Component({
-    selector: 'nb-spinner',
-    template: `
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-spinner',
+  template: `
     <span class="spin-circle"></span>
-    <span class="message" *ngIf="message">{{ message }}</span>
+    <span class="message" *ngIf="message()">{{ message() }}</span>
   `,
-    styleUrls: ['./spinner.component.scss'],
-    standalone: false
+  styleUrls: ['./spinner.component.scss'],
+  standalone: false,
 })
 export class NbSpinnerComponent {
+  protected readonly statusService = inject(NbStatusService);
 
   /**
    * Loading text that is shown near the icon
    * @type string
    */
-  @Input()
-  message: string = 'Loading...';
+  readonly message = input('Loading...');
 
   /**
    * Spinner size, available sizes:
    * tiny, small, medium, large, giant
    * @param {string} value
    */
-  @Input()
-  size: NbComponentSize = 'medium';
+  readonly size = input<NbComponentSize>('medium');
 
   /**
    * Spinner status (adds specific styles):
    * `basic`, `primary`, `info`, `success`, `warning`, `danger`, `control`.
    */
-  @Input() status: NbComponentOrCustomStatus = 'basic';
+  readonly status = input<NbComponentOrCustomStatus>('basic');
 
   @HostBinding('class.size-tiny')
   get tiny() {
-    return this.size === 'tiny';
+    return this.size() === 'tiny';
   }
 
   @HostBinding('class.size-small')
   get small() {
-    return this.size === 'small';
+    return this.size() === 'small';
   }
 
   @HostBinding('class.size-medium')
   get medium() {
-    return this.size === 'medium';
+    return this.size() === 'medium';
   }
 
   @HostBinding('class.size-large')
   get large() {
-    return this.size === 'large';
+    return this.size() === 'large';
   }
 
   @HostBinding('class.size-giant')
   get giant() {
-    return this.size === 'giant';
+    return this.size() === 'giant';
   }
 
   @HostBinding('class.status-primary')
   get primary() {
-    return this.status === 'primary';
+    return this.status() === 'primary';
   }
 
   @HostBinding('class.status-info')
   get info() {
-    return this.status === 'info';
+    return this.status() === 'info';
   }
 
   @HostBinding('class.status-success')
   get success() {
-    return this.status === 'success';
+    return this.status() === 'success';
   }
 
   @HostBinding('class.status-warning')
   get warning() {
-    return this.status === 'warning';
+    return this.status() === 'warning';
   }
 
   @HostBinding('class.status-danger')
   get danger() {
-    return this.status === 'danger';
+    return this.status() === 'danger';
   }
 
   @HostBinding('class.status-basic')
   get basic() {
-    return this.status === 'basic';
+    return this.status() === 'basic';
   }
 
   @HostBinding('class.status-control')
   get control() {
-    return this.status === 'control';
+    return this.status() === 'control';
   }
 
   @HostBinding('class')
   get additionalClasses(): string[] {
-    if (this.statusService.isCustomStatus(this.status)) {
-      return [this.statusService.getStatusClass(this.status)];
+    if (this.statusService.isCustomStatus(this.status())) {
+      return [this.statusService.getStatusClass(this.status())];
     }
     return [];
-  }
-
-  constructor(protected statusService: NbStatusService) {
   }
 }

@@ -4,13 +4,12 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
 
-import { Component, Input, HostBinding, Output, EventEmitter } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostBinding, inject, input, Output } from '@angular/core';
 
 import { NbStatusService } from '../../services/status.service';
 import { NbComponentSize } from '../component-size';
 import { NbComponentOrCustomStatus, NbComponentStatus } from '../component-status';
-import { convertToBoolProperty, NbBooleanInput } from '../helpers';
-
+import { convertToBoolProperty } from '../helpers';
 
 /**
  * Alert component.
@@ -109,67 +108,62 @@ import { convertToBoolProperty, NbBooleanInput } from '../helpers';
  * alert-outline-control-color:
  */
 @Component({
-    selector: 'nb-alert',
-    styleUrls: ['./alert.component.scss'],
-    template: `
-    <button *ngIf="closable" type="button" class="close" aria-label="Close" (click)="onClose()">
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'nb-alert',
+  styleUrls: ['./alert.component.scss'],
+  template: `
+    <button *ngIf="closable()" type="button" class="close" aria-label="Close" (click)="onClose()">
       <span aria-hidden="true">&times;</span>
     </button>
     <ng-content></ng-content>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbAlertComponent {
+  protected readonly statusService = inject(NbStatusService);
 
   /**
    * Alert size, available sizes:
    * `tiny`, `small`, `medium`, `large`, `giant`
    * Unset by default.
    */
-  @Input() size: '' | NbComponentSize = '';
+  readonly size = input<'' | NbComponentSize>('');
 
   /**
    * Alert status (adds specific styles):
    * `basic` (default), `primary`, `success`, `info`, `warning`, `danger`, `control`.
    */
-  @Input() status: NbComponentOrCustomStatus = 'basic';
+  readonly status = input<NbComponentOrCustomStatus>('basic');
 
   /**
    * Alert accent (color of the top border):
    * `basic`, `primary`, `success`, `info`, `warning`, `danger`, `control`.
    * Unset by default.
    */
-  @Input() accent: '' | NbComponentStatus = '';
+  readonly accent = input<'' | NbComponentStatus>('');
 
   /**
    * Alert outline (color of the border):
    * `basic`, `primary`, `success`, `info`, `warning`, `danger`, `control`.
    * Unset by default.
    */
-  @Input() outline: '' | NbComponentStatus = '';
+  readonly outline = input<'' | NbComponentStatus>('');
 
   /**
    * Shows `close` icon
    */
-  @Input()
+  readonly closable = input(false, { transform: convertToBoolProperty });
+
   @HostBinding('class.closable')
-  get closable(): boolean {
-    return this._closable;
+  get closableClass(): boolean {
+    return this.closable();
   }
-  set closable(value: boolean) {
-    this._closable = convertToBoolProperty(value);
-  }
-  protected _closable: boolean = false;
-  static ngAcceptInputType_closable: NbBooleanInput;
 
   /**
    * Emits when chip is removed
    * @type EventEmitter<any>
    */
   @Output() close = new EventEmitter();
-
-  constructor(protected statusService: NbStatusService) {
-  }
 
   /**
    * Emits the removed chip event
@@ -180,138 +174,138 @@ export class NbAlertComponent {
 
   @HostBinding('class.size-tiny')
   get tiny() {
-    return this.size === 'tiny';
+    return this.size() === 'tiny';
   }
 
   @HostBinding('class.size-small')
   get small() {
-    return this.size === 'small';
+    return this.size() === 'small';
   }
 
   @HostBinding('class.size-medium')
   get medium() {
-    return this.size === 'medium';
+    return this.size() === 'medium';
   }
 
   @HostBinding('class.size-large')
   get large() {
-    return this.size === 'large';
+    return this.size() === 'large';
   }
 
   @HostBinding('class.size-giant')
   get giant() {
-    return this.size === 'giant';
+    return this.size() === 'giant';
   }
 
   @HostBinding('class.status-primary')
   get primary() {
-    return this.status === 'primary';
+    return this.status() === 'primary';
   }
 
   @HostBinding('class.status-success')
   get success() {
-    return this.status === 'success';
+    return this.status() === 'success';
   }
 
   @HostBinding('class.status-info')
   get info() {
-    return this.status === 'info';
+    return this.status() === 'info';
   }
 
   @HostBinding('class.status-warning')
   get warning() {
-    return this.status === 'warning';
+    return this.status() === 'warning';
   }
 
   @HostBinding('class.status-danger')
   get danger() {
-    return this.status === 'danger';
+    return this.status() === 'danger';
   }
 
   @HostBinding('class.status-basic')
   get basic() {
-    return this.status === 'basic';
+    return this.status() === 'basic';
   }
 
   @HostBinding('class.status-control')
   get control() {
-    return this.status === 'control';
+    return this.status() === 'control';
   }
 
   @HostBinding('class.accent-primary')
   get primaryAccent() {
-    return this.accent === 'primary';
+    return this.accent() === 'primary';
   }
 
   @HostBinding('class.accent-success')
   get successAccent() {
-    return this.accent === 'success';
+    return this.accent() === 'success';
   }
 
   @HostBinding('class.accent-info')
   get infoAccent() {
-    return this.accent === 'info';
+    return this.accent() === 'info';
   }
 
   @HostBinding('class.accent-warning')
   get warningAccent() {
-    return this.accent === 'warning';
+    return this.accent() === 'warning';
   }
 
   @HostBinding('class.accent-danger')
   get dangerAccent() {
-    return this.accent === 'danger';
+    return this.accent() === 'danger';
   }
 
   @HostBinding('class.accent-basic')
   get basicAccent() {
-    return this.accent === 'basic';
+    return this.accent() === 'basic';
   }
 
   @HostBinding('class.accent-control')
   get controlAccent() {
-    return this.accent === 'control';
+    return this.accent() === 'control';
   }
 
   @HostBinding('class.outline-primary')
   get primaryOutline() {
-    return this.outline === 'primary';
+    return this.outline() === 'primary';
   }
 
   @HostBinding('class.outline-success')
   get successOutline() {
-    return this.outline === 'success';
+    return this.outline() === 'success';
   }
 
   @HostBinding('class.outline-info')
   get infoOutline() {
-    return this.outline === 'info';
+    return this.outline() === 'info';
   }
 
   @HostBinding('class.outline-warning')
   get warningOutline() {
-    return this.outline === 'warning';
+    return this.outline() === 'warning';
   }
 
   @HostBinding('class.outline-danger')
   get dangerOutline() {
-    return this.outline === 'danger';
+    return this.outline() === 'danger';
   }
 
   @HostBinding('class.outline-basic')
   get basicOutline() {
-    return this.outline === 'basic';
+    return this.outline() === 'basic';
   }
 
   @HostBinding('class.outline-control')
   get controlOutline() {
-    return this.outline === 'control';
+    return this.outline() === 'control';
   }
 
   @HostBinding('class')
   get additionalClasses(): string[] {
-    if (this.statusService.isCustomStatus(this.status)) {
-      return [this.statusService.getStatusClass(this.status)];
+    if (this.statusService.isCustomStatus(this.status())) {
+      return [this.statusService.getStatusClass(this.status())];
     }
     return [];
   }
