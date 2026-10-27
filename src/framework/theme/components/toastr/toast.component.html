@@ -5,3 +5,12 @@
   <span class="title subtitle">{{ toast().title }}</span>
   <div class="message">{{ toast().message }}</div>
 </div>
+<button
+  *ngIf="closeButton"
+  type="button"
+  class="close-button"
+  [attr.aria-label]="toast().config.closeButtonLabel"
+  (click)="onCloseClick($event)"
+>
+  <nb-icon icon="close-outline" pack="nebular-essentials"></nb-icon>
+</button>

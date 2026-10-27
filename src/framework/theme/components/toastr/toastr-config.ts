@@ -12,7 +12,7 @@ import { NbIconConfig } from '../icon/icon.component';
 
 type IconToClassMap = {
   [status in NbComponentStatus]: string;
-}
+};
 
 export const NB_TOASTR_CONFIG = new InjectionToken<NbToastrConfig>('Default toastr options');
 
@@ -39,6 +39,19 @@ export class NbToastrConfig {
    * */
   destroyByClick: boolean = true;
   /**
+   * Renders a close button in the top-end corner of the toast that destroys it.
+   * */
+  closeButton: boolean = false;
+  /**
+   * Accessible label of the close button.
+   * */
+  closeButtonLabel: string = 'Close';
+  /**
+   * Pauses the auto-dismiss timer while the pointer is over the toast.
+   * The full duration starts again once the pointer leaves.
+   * */
+  pauseOnHover: boolean = false;
+  /**
    * If preventDuplicates is true then the toast with the same title, message and status will not be rendered.
    * Find duplicates behaviour determined by `preventDuplicates`.
    * The default `previous` duplicate behaviour is used.
@@ -49,8 +62,8 @@ export class NbToastrConfig {
    * */
   duplicatesBehaviour: NbDuplicateToastBehaviour = 'previous';
   /*
-  * The number of visible toasts. If the limit exceeded the oldest toast will be removed.
-  * */
+   * The number of visible toasts. If the limit exceeded the oldest toast will be removed.
+   * */
   limit?: number = null;
   /**
    * Class to be applied to the toast.
@@ -64,6 +77,10 @@ export class NbToastrConfig {
    * Icon name or icon config object that can be provided to render custom icon.
    * */
   icon: string | NbIconConfig = 'email';
+  /**
+   * Replaces the built-in status icons for the statuses it lists, unless a toast sets its own `icon`.
+   * */
+  statusIcons: Partial<Record<NbComponentStatus, string | NbIconConfig>> = {};
   /**
    * Toast status icon-class mapping.
    * */
@@ -84,7 +101,7 @@ export class NbToastrConfig {
 
   protected patchIcon(config: Partial<NbToastrConfig>) {
     if (!('icon' in config)) {
-      config.icon = {
+      config.icon = config.statusIcons?.[config.status ?? 'basic'] ?? {
         icon: this.icons[config.status] || this.icons.basic,
         pack: 'nebular-essentials',
       };

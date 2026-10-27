@@ -102,6 +102,9 @@ export class NbToastComponent implements OnInit, OnDestroy {
 
   @Output() destroy: EventEmitter<void> = new EventEmitter();
   @Output() toastClick: EventEmitter<void> = new EventEmitter();
+  @Output() closeClick: EventEmitter<void> = new EventEmitter();
+  @Output() pointerEnter: EventEmitter<void> = new EventEmitter();
+  @Output() pointerLeave: EventEmitter<void> = new EventEmitter();
 
   @HostBinding('class.status-success')
   get success(): boolean {
@@ -143,6 +146,11 @@ export class NbToastComponent implements OnInit, OnDestroy {
     return this.toast().config.destroyByClick;
   }
 
+  @HostBinding('class.has-close-button')
+  get closeButton(): boolean {
+    return this.toast().config.closeButton;
+  }
+
   @HostBinding('class.has-icon')
   get hasIcon(): boolean {
     const { icon } = this.toast().config;
@@ -173,6 +181,22 @@ export class NbToastComponent implements OnInit, OnDestroy {
   @HostListener('click')
   onClick() {
     this.toastClick.emit();
+  }
+
+  @HostListener('mouseenter')
+  onMouseEnter() {
+    this.pointerEnter.emit();
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave() {
+    this.pointerLeave.emit();
+  }
+
+  onCloseClick(event: MouseEvent) {
+    // Keeps a destroy-by-click toast from also handling the click as a toast click.
+    event.stopPropagation();
+    this.closeClick.emit();
   }
 
   constructor(
