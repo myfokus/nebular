@@ -122,6 +122,22 @@ reads through getters, so minimizing and restoring left the body as first render
 
 Together these fix five `datepicker.spec.ts` regressions and one in `window.service.spec.ts`.
 
+### Toastr additions
+
+`NbToastrConfig` gains four opt-in options. Their defaults keep upstream's behaviour, so a consumer
+that does not set them sees no change:
+
+- `closeButton` (default `false`) renders an X button in the top-end corner that destroys the toast.
+  Its click does not bubble into the toast's own click handling.
+- `closeButtonLabel` (default `'Close'`) is the button's `aria-label`.
+- `pauseOnHover` (default `false`) stops the auto-dismiss timer while the pointer is over the toast
+  and restarts the full `duration` when it leaves.
+- `statusIcons` (default `{}`) replaces the built-in status icons for the statuses it lists, so an app
+  can set its own icon per status once in `forRoot` instead of on every call.
+
+Upstream has neither a close button nor a pausable timer. Combined with `destroyByClick: false` they
+make the toast's text selectable.
+
 ### CI and release
 
 - `.github/workflows/pr-check.yml` is **replaced**. Upstream's version builds the docs site, the

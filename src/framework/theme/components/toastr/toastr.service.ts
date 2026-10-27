@@ -39,6 +39,7 @@ export class NbToastRef {
 export class NbToastContainer {
   protected toasts: NbToast[] = [];
   protected prevToast: NbToast;
+  protected destroyTimeouts: Map<NbToast, ReturnType<typeof setTimeout>> = new Map();
 
   get nativeElement() {
     return this.containerRef.location.nativeElement;
@@ -62,8 +63,16 @@ export class NbToastContainer {
       this.subscribeOnClick(toastComponent, toast);
     }
 
+    if (toast.config.closeButton) {
+      this.subscribeOnCloseClick(toastComponent, toast);
+    }
+
     if (toast.config.duration) {
       this.setDestroyTimeout(toast);
+
+      if (toast.config.pauseOnHover) {
+        this.subscribeOnHover(toastComponent, toast);
+      }
     }
 
     this.prevToast = toast;
@@ -79,6 +88,7 @@ export class NbToastContainer {
       this.prevToast = null;
     }
 
+    this.clearDestroyTimeout(toast);
     this.toasts = this.toasts.filter((t) => t !== toast);
     this.updateContainer();
   }
@@ -133,7 +143,27 @@ export class NbToastContainer {
   }
 
   protected setDestroyTimeout(toast: NbToast) {
-    setTimeout(() => this.destroy(toast), toast.config.duration);
+    this.clearDestroyTimeout(toast);
+    this.destroyTimeouts.set(
+      toast,
+      setTimeout(() => this.destroy(toast), toast.config.duration),
+    );
+  }
+
+  protected clearDestroyTimeout(toast: NbToast) {
+    clearTimeout(this.destroyTimeouts.get(toast));
+    this.destroyTimeouts.delete(toast);
+  }
+
+  protected subscribeOnCloseClick(toastComponent: NbToastComponent, toast: NbToast) {
+    toastComponent.closeClick.pipe(takeUntil(toastComponent.destroy)).subscribe(() => this.destroy(toast));
+  }
+
+  protected subscribeOnHover(toastComponent: NbToastComponent, toast: NbToast) {
+    toastComponent.pointerEnter
+      .pipe(takeUntil(toastComponent.destroy))
+      .subscribe(() => this.clearDestroyTimeout(toast));
+    toastComponent.pointerLeave.pipe(takeUntil(toastComponent.destroy)).subscribe(() => this.setDestroyTimeout(toast));
   }
 
   protected subscribeOnClick(toastComponent: NbToastComponent, toast: NbToast) {

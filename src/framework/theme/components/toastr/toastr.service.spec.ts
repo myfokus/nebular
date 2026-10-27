@@ -13,6 +13,7 @@ import {
   NbToastrModule,
   NbThemeModule,
   NbLayoutModule,
+  NbToastrConfig,
 } from '@nebular/theme';
 
 @Component({
@@ -35,6 +36,10 @@ export class NbToastrTestComponent {
 
   showToastWithDuration(duration: number) {
     this.toastrService.show('testing toastr', '', { duration });
+  }
+
+  showToastWithConfig(config: Partial<NbToastrConfig>) {
+    this.toastrService.show('testing toastr', '', config);
   }
 }
 
@@ -78,6 +83,62 @@ describe('toastr-component', () => {
     tick(2000);
     fixture.detectChanges();
 
+    expect(document.querySelectorAll('nb-toast').length).toEqual(0);
+  }));
+
+  it('should not render a close button by default', () => {
+    fixture.debugElement.componentInstance.showToast('toast-test-class');
+    fixture.detectChanges();
+    expect(document.querySelector('nb-toast .close-button')).toBeNull();
+  });
+
+  it('should remove the toast when its close button is clicked', fakeAsync(() => {
+    fixture.debugElement.componentInstance.showToastWithConfig({
+      closeButton: true,
+      closeButtonLabel: 'Schließen',
+      destroyByClick: false,
+      duration: 0,
+    });
+    fixture.detectChanges();
+    const closeButton = document.querySelector<HTMLButtonElement>('nb-toast .close-button');
+    expect(closeButton.getAttribute('aria-label')).toEqual('Schließen');
+
+    closeButton.click();
+    tick();
+    fixture.detectChanges();
+
+    expect(document.querySelectorAll('nb-toast').length).toEqual(0);
+  }));
+
+  it('should keep the toast when its body is clicked and destroyByClick is off', fakeAsync(() => {
+    fixture.debugElement.componentInstance.showToastWithConfig({ destroyByClick: false, duration: 0 });
+    fixture.detectChanges();
+
+    document.querySelector<HTMLElement>('nb-toast').click();
+    tick();
+    fixture.detectChanges();
+
+    expect(document.querySelectorAll('nb-toast').length).toEqual(1);
+  }));
+
+  it('should pause the auto-dismiss while hovered and restart it on leave', fakeAsync(() => {
+    fixture.debugElement.componentInstance.showToastWithConfig({ duration: 2000, pauseOnHover: true });
+    fixture.detectChanges();
+    const toast = document.querySelector<HTMLElement>('nb-toast');
+
+    tick(1000);
+    toast.dispatchEvent(new MouseEvent('mouseenter'));
+    tick(5000);
+    fixture.detectChanges();
+    expect(document.querySelectorAll('nb-toast').length).toEqual(1);
+
+    toast.dispatchEvent(new MouseEvent('mouseleave'));
+    tick(1999);
+    fixture.detectChanges();
+    expect(document.querySelectorAll('nb-toast').length).toEqual(1);
+
+    tick(1);
+    fixture.detectChanges();
     expect(document.querySelectorAll('nb-toast').length).toEqual(0);
   }));
 });
@@ -135,6 +196,19 @@ describe('toastr-service', () => {
     expect(config.preventDuplicates).toBe(true, 'incorrect preventDuplicates');
     expect(config.hasIcon).toBe(true, 'incorrect hasIcon');
     expect(config.toastClass).toBe('my-toast-class', 'incorrect toastClass');
+  });
+
+  it('should take the status icon from statusIcons when the toast sets no icon', () => {
+    const attachSpy = spyOn(containerStub, 'attach');
+
+    toastr.show('', '', { status: 'success', statusIcons: { success: 'checkmark-circle-2-outline' } });
+    toastr.show('', '', { status: 'danger', statusIcons: { success: 'checkmark-circle-2-outline' } });
+    toastr.show('', '', { status: 'success', icon: 'star', statusIcons: { success: 'checkmark-circle-2-outline' } });
+
+    const configs = (attachSpy.calls.allArgs() as [{ config }][]).map(([{ config }]) => config);
+    expect(configs[0].icon).toBe('checkmark-circle-2-outline');
+    expect(configs[1].icon).toEqual({ icon: 'flash-outline', pack: 'nebular-essentials' });
+    expect(configs[2].icon).toBe('star');
   });
 
   it('should call show with success status when success called', () => {
