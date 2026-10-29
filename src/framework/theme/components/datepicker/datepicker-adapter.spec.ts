@@ -103,6 +103,19 @@ describe('Date Adapters', () => {
       expect(spy.calls.argsFor(1)).toEqual([endDate, format]);
     });
 
+    it('should leave end undefined when parsing a single date', () => {
+      const startDate = '11/11/11';
+      const format = 'mm/dd/yy';
+      const expectedStart = new Date();
+      const spy = spyOn(dateService, 'parse').and.returnValue(expectedStart);
+
+      const { start: actualStart, end: actualEnd }: NbCalendarRange<Date> = adapterService.parse(startDate, format);
+      expect(actualStart).toEqual(expectedStart);
+      expect(actualEnd).toBeUndefined();
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(startDate, format);
+    });
+
     it('should format valid date range', () => {
       const range: NbCalendarRange<Date> = { start: new Date(), end: new Date() };
       const format = 'mm/dd/yyyy';
@@ -151,6 +164,13 @@ describe('Date Adapters', () => {
         expect(spy.calls.argsFor(i)).toEqual([startDate, format]);
         expect(spy.calls.argsFor(i + 1)).toEqual([endDate, format]);
       }
+    });
+    it('should not validate a single date as a range', () => {
+      const spy = spyOn(dateService, 'isValidDateString').and.returnValue(true);
+
+      expect(adapterService.isValid('11/11/11', 'mm/dd/yy')).toBe(false);
+      expect(adapterService.isValid('11/11/11 - ', 'mm/dd/yy')).toBe(false);
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 

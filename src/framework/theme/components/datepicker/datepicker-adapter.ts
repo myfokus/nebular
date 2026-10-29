@@ -42,10 +42,10 @@ export class NbRangeAdapterService<D> extends NbDatepickerAdapter<NbCalendarRang
   }
 
   parse(range: string, format): NbCalendarRange<D> {
-    const [start, end] = range.split('-').map(subDate => subDate.trim());
+    const [start, end] = range.split('-').map((subDate) => subDate.trim());
     return {
       start: this.dateService.parse(start, format),
-      end: this.dateService.parse(end, format),
+      end: end ? this.dateService.parse(end, format) : undefined,
     };
   }
 
@@ -72,8 +72,10 @@ export class NbRangeAdapterService<D> extends NbDatepickerAdapter<NbCalendarRang
   }
 
   isValid(range: string, format: string): boolean {
-    const [start, end] = range.split('-').map(subDate => subDate.trim());
-    return this.dateService.isValidDateString(start, format) && this.dateService.isValidDateString(end, format);
+    const [start, end] = range.split('-').map((subDate) => subDate.trim());
+    return (
+      !!end && this.dateService.isValidDateString(start, format) && this.dateService.isValidDateString(end, format)
+    );
   }
 }
 

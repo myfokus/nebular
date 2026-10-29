@@ -138,6 +138,14 @@ that does not set them sees no change:
 Upstream has neither a close button nor a pausable timer. Combined with `destroyByClick: false` they
 make the toast's text selectable.
 
+### Range datepicker input parsing
+
+`NbRangeAdapterService` splits the typed text on `-`. Upstream passes the missing end of a single
+date (`01.10.2026`) straight to the date service, and date-fns throws
+`Cannot read properties of undefined (reading 'match')` on every `input` event once the start is a
+complete date. `isValid` now treats a missing end as not a valid range, and `parse` leaves `end`
+`undefined` instead of parsing it. What the input does while typing is unchanged.
+
 ### CI and release
 
 - `.github/workflows/pr-check.yml` is **replaced**. Upstream's version builds the docs site, the
