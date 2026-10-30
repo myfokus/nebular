@@ -21,8 +21,8 @@ import {
 } from '@nebular/theme';
 
 @Component({
-    selector: 'nb-datepicker-test',
-    template: `
+  selector: 'nb-datepicker-test',
+  template: `
     <nb-layout>
       <nb-layout-column>
         <input [nbDatepicker]="datepicker" />
@@ -30,7 +30,7 @@ import {
       </nb-layout-column>
     </nb-layout>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbDatepickerTestComponent {
   @ViewChild(NbDatepickerComponent) datepicker: NbDatepickerComponent<Date>;
@@ -38,8 +38,8 @@ export class NbDatepickerTestComponent {
 }
 
 @Component({
-    selector: 'nb-rangepicker-test',
-    template: `
+  selector: 'nb-rangepicker-test',
+  template: `
     <nb-layout>
       <nb-layout-column>
         <input [nbDatepicker]="rangepicker" />
@@ -47,7 +47,7 @@ export class NbDatepickerTestComponent {
       </nb-layout-column>
     </nb-layout>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbRangepickerTestComponent {
   @ViewChild(NbRangepickerComponent) rangepicker: NbRangepickerComponent<Date>;
@@ -55,8 +55,8 @@ export class NbRangepickerTestComponent {
 }
 
 @Component({
-    selector: 'nb-date-timepicker-test',
-    template: `
+  selector: 'nb-date-timepicker-test',
+  template: `
     <nb-layout>
       <nb-layout-column>
         <input [nbDatepicker]="rangepicker" />
@@ -64,7 +64,7 @@ export class NbRangepickerTestComponent {
       </nb-layout-column>
     </nb-layout>
   `,
-    standalone: false
+  standalone: false,
 })
 export class NbDateTimepickerTestComponent {
   @ViewChild(NbDateTimePickerComponent) dateTimepicker: NbDateTimePickerComponent<Date>;
@@ -199,6 +199,68 @@ describe('nb-datepicker', () => {
     showDatepicker();
 
     expect(datepickerDirective.validate()).not.toBe(null);
+  });
+
+  describe('writeValue', () => {
+    const invalidDate = new Date('');
+
+    it('should leave the input empty and the calendar on the current month for an Invalid Date', () => {
+      expect(() => datepickerDirective.writeValue(invalidDate)).not.toThrow();
+      expect(input.value).toEqual('');
+
+      showDatepicker();
+      expect(datepicker.visibleDate).toBeUndefined();
+      expect(overlay.querySelector('.day-cell.today')).not.toBeNull();
+    });
+
+    it('should not throw when an Invalid Date is written while the picker is open', () => {
+      showDatepicker();
+
+      expect(() => {
+        datepickerDirective.writeValue(invalidDate);
+        appRef.tick();
+      }).not.toThrow();
+
+      expect(input.value).toEqual('');
+      expect(overlay.querySelector('.day-cell.today')).not.toBeNull();
+    });
+
+    it('should not queue an Invalid Date written before the picker is ready', () => {
+      const directive = datepickerDirective as any;
+      directive.isDatepickerReady = false;
+
+      datepickerDirective.writeValue(invalidDate);
+
+      expect(directive.queue).toBeNull();
+    });
+
+    it('should queue a valid date written before the picker is ready', () => {
+      const directive = datepickerDirective as any;
+      const date = new Date(2018, 8, 17);
+      directive.isDatepickerReady = false;
+
+      datepickerDirective.writeValue(date);
+
+      expect(directive.queue).toBe(date);
+    });
+
+    it('should write a valid date to the input and the picker', () => {
+      const date = new Date(2018, 8, 17);
+      showDatepicker();
+
+      datepickerDirective.writeValue(date);
+
+      expect(input.value).not.toEqual('');
+      expect(datepicker.visibleDate).toBe(date);
+    });
+
+    it('should clear the input for null', () => {
+      datepickerDirective.writeValue(new Date(2018, 8, 17));
+
+      datepickerDirective.writeValue(null);
+
+      expect(input.value).toEqual('');
+    });
   });
 });
 
