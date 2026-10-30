@@ -1,6 +1,6 @@
 {
   "name": "@myfokus/nebular-theme",
-  "version": "18.1.1",
+  "version": "18.1.2",
   "description": "Fork of @nebular/theme, compatible with Angular 22 and @angular/cdk 22",
   "author": "akveo",
   "license": "MIT",

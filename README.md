@@ -146,6 +146,13 @@ date (`01.10.2026`) straight to the date service, and date-fns throws
 complete date. `isValid` now treats a missing end as not a valid range, and `parse` leaves `end`
 `undefined` instead of parsing it. What the input does while typing is unchanged.
 
+### Invalid Date in the datepicker
+
+An Invalid Date is truthy, so upstream's `NbDatepickerDirective.writeValue` passes it on: the date
+service's `format` throws `RangeError: Invalid time value`, and the calendar builds an empty weeks
+array and throws `Cannot read properties of undefined (reading 'length')`. `writeValue` now treats it
+as `null` before it is queued or written. Range values are not `Date`s and pass through unchanged.
+
 ### CI and release
 
 - `.github/workflows/pr-check.yml` is **replaced**. Upstream's version builds the docs site, the

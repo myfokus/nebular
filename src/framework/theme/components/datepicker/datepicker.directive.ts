@@ -262,20 +262,20 @@ export const NB_DATE_SERVICE_OPTIONS = new InjectionToken('Date service options'
  * datepicker-shadow:
  * */
 @Directive({
-    selector: 'input[nbDatepicker]',
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => NbDatepickerDirective),
-            multi: true,
-        },
-        {
-            provide: NG_VALIDATORS,
-            useExisting: forwardRef(() => NbDatepickerDirective),
-            multi: true,
-        },
-    ],
-    standalone: false
+  selector: 'input[nbDatepicker]',
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => NbDatepickerDirective),
+      multi: true,
+    },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => NbDatepickerDirective),
+      multi: true,
+    },
+  ],
+  standalone: false,
 })
 export class NbDatepickerDirective<D> implements OnDestroy, ControlValueAccessor, Validator {
   /**
@@ -345,6 +345,11 @@ export class NbDatepickerDirective<D> implements OnDestroy, ControlValueAccessor
    * Writes value in picker and html input element.
    * */
   writeValue(value: D) {
+    // An Invalid Date is truthy, so the date services and the calendar would take it for a real value.
+    if (value instanceof Date && isNaN(value.getTime())) {
+      value = null;
+    }
+
     if (this.isDatepickerReady) {
       this.writePicker(value);
       this.writeInput(value);
