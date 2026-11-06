@@ -232,6 +232,11 @@ export class NbAlertComponent {
     return this.status() === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status() === 'magic';
+  }
+
   @HostBinding('class.accent-primary')
   get primaryAccent() {
     return this.accent() === 'primary';
@@ -267,6 +272,11 @@ export class NbAlertComponent {
     return this.accent() === 'control';
   }
 
+  @HostBinding('class.accent-magic')
+  get magicAccent() {
+    return this.accent() === 'magic';
+  }
+
   @HostBinding('class.outline-primary')
   get primaryOutline() {
     return this.outline() === 'primary';
@@ -300,6 +310,11 @@ export class NbAlertComponent {
   @HostBinding('class.outline-control')
   get controlOutline() {
     return this.outline() === 'control';
+  }
+
+  @HostBinding('class.outline-magic')
+  get magicOutline() {
+    return this.outline() === 'magic';
   }
 
   @HostBinding('class')

@@ -11,12 +11,12 @@ import { By } from '@angular/platform-browser';
 import { NbComponentStatus, NbComponentSize, NbComponentShape, NbInputModule } from '@nebular/theme';
 
 @Component({
-    template: `
+  template: `
     <input #inputEl nbInput [fieldSize]="size" [status]="status" [shape]="shape" [fullWidth]="fullWidth" />
     <textarea #textareaEl nbInput [fieldSize]="size" [status]="status" [shape]="shape" [fullWidth]="fullWidth">
     </textarea>
   `,
-    standalone: false
+  standalone: false,
 })
 class InputTestComponent {
   @Input() size: NbComponentSize;
@@ -51,6 +51,14 @@ describe('Directive: NbInput', () => {
 
     expect(inputElement.classList).toContain('status-danger');
     expect(textareaElement.classList).toContain('status-danger');
+  });
+
+  it('should set magic status', () => {
+    inputTestComponent.status = 'magic';
+    fixture.detectChanges();
+
+    expect(inputElement.classList).toContain('status-magic');
+    expect(textareaElement.classList).toContain('status-magic');
   });
 
   it('should set size', () => {

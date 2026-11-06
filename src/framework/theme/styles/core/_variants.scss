@@ -8,7 +8,7 @@
 @use '../theming-variables';
 
 @function nb-get-core-statuses() {
-  @return 'basic', 'primary', 'success', 'warning', 'danger', 'info', 'control';
+  @return 'basic', 'primary', 'success', 'warning', 'danger', 'info', 'control', 'magic';
 }
 
 @function nb-get-statuses() {

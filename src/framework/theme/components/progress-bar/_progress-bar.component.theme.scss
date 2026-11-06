@@ -48,4 +48,8 @@
       }
     }
   }
+
+  nb-progress-bar.status-magic .progress-value {
+    background-image: nb-theme(progress-bar-magic-filled-background-image);
+  }
 }

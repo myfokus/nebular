@@ -74,5 +74,26 @@
         }
       }
     }
+
+    &.status-magic {
+      background-image: nb-theme(button-hero-magic-background-image);
+
+      &:focus {
+        background-image: nb-theme(button-hero-magic-focus-background-image);
+      }
+
+      &:hover {
+        background-image: nb-theme(button-hero-magic-hover-background-image);
+      }
+
+      &:active {
+        background-image: nb-theme(button-hero-magic-active-background-image);
+      }
+
+      &[disabled],
+      &.btn-disabled {
+        background-image: none;
+      }
+    }
   }
 }

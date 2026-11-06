@@ -185,6 +185,11 @@ export class NbBadgeComponent {
     return this.status() === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic(): boolean {
+    return this.status() === 'magic';
+  }
+
   @HostBinding('class.position-top')
   get top(): boolean {
     return this.position().includes('top');

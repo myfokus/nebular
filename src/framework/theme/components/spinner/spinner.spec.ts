@@ -27,6 +27,12 @@ describe('Component: NbSpinner', () => {
     expect(fixture.debugElement.nativeElement.classList.contains('status-danger')).toBeTruthy();
   });
 
+  it('should set class magic', () => {
+    fixture.componentRef.setInput('status', 'magic');
+    fixture.detectChanges();
+    expect(fixture.debugElement.nativeElement.classList.contains('status-magic')).toBeTruthy();
+  });
+
   it('should set size small', () => {
     fixture.componentRef.setInput('size', 'small');
     fixture.detectChanges();

@@ -66,4 +66,24 @@
       }
     }
   }
+
+  nb-alert.status-magic {
+    background-image: nb-theme(alert-magic-background-image);
+  }
+
+  // A magic accent or outline is a gradient border all around: a one-sided gradient would lose the radius.
+  @each $status in nb-get-statuses() {
+    @if ($status != 'magic') {
+      nb-alert.status-#{$status} {
+        &.accent-magic {
+          border: nb-theme(alert-outline-width) solid transparent;
+          @include nb-magic-border(nb-theme(alert-accent-magic-image), nb-theme(alert-#{$status}-background-color));
+        }
+
+        &.outline-magic {
+          @include nb-magic-border(nb-theme(alert-outline-magic-image), nb-theme(alert-#{$status}-background-color));
+        }
+      }
+    }
+  }
 }

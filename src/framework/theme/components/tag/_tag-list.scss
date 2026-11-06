@@ -61,6 +61,17 @@
         }
       }
     }
+
+    &.status-magic {
+      @include nb-magic-border(nb-theme(tag-input-magic-border-image), nb-theme(tag-input-magic-background-color));
+
+      &.focus {
+        @include nb-magic-border(
+          nb-theme(tag-input-magic-focus-border-image),
+          nb-theme(tag-input-magic-focus-background-color)
+        );
+      }
+    }
   }
 
   @include form-field-theme.nb-form-field-root-component('nb-tag-list');

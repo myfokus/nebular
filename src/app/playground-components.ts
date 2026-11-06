@@ -160,6 +160,17 @@ export const PLAYGROUND_COMPONENTS: ComponentLink[] = [
     ],
   },
   {
+    path: 'magic',
+    children: [
+      {
+        path: 'magic-gallery.component',
+        link: '/magic/magic-gallery.component',
+        component: 'MagicGalleryComponent',
+        name: 'Magic Gallery',
+      },
+    ],
+  },
+  {
     path: 'badge',
     children: [
       {
@@ -2293,6 +2304,17 @@ export const PLAYGROUND_COMPONENTS: ComponentLink[] = [
         link: '/autocomplete/autocomplete-disabled.component',
         component: 'AutocompleteDisabledComponent',
         name: 'Autocomplete Disabled',
+      },
+    ],
+  },
+  {
+    path: 'magic',
+    children: [
+      {
+        path: 'magic-gallery.component',
+        link: '/magic/magic-gallery.component',
+        component: 'MagicGalleryComponent',
+        name: 'Magic Gallery',
       },
     ],
   },

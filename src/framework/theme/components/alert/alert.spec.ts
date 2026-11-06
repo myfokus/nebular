@@ -27,6 +27,20 @@ describe('Component: NbAlert', () => {
     expect(fixture.debugElement.nativeElement.classList.contains('status-danger')).toBeTruthy();
   });
 
+  it('should set class magic', () => {
+    fixture.componentRef.setInput('status', 'magic');
+    fixture.detectChanges();
+    expect(fixture.debugElement.nativeElement.classList.contains('status-magic')).toBeTruthy();
+  });
+
+  it('should set magic accent and outline classes', () => {
+    fixture.componentRef.setInput('accent', 'magic');
+    fixture.componentRef.setInput('outline', 'magic');
+    fixture.detectChanges();
+    expect(fixture.debugElement.nativeElement.classList.contains('accent-magic')).toBeTruthy();
+    expect(fixture.debugElement.nativeElement.classList.contains('outline-magic')).toBeTruthy();
+  });
+
   it('should set outline class', () => {
     fixture.componentRef.setInput('outline', 'success');
     fixture.detectChanges();

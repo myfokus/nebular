@@ -1,0 +1,110 @@
+/**
+ * @license
+ * Copyright Akveo. All Rights Reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ */
+
+@use 'sass:list';
+
+// The `magic` status paints with a gradient, which background-color, border-color and color can't carry.
+// Component themes emit the status' solid colours like for any other status and then include these mixins
+// in their `.status-magic` blocks, so the solid colours stay as the fallback underneath.
+
+/// Paints a surface with $gradient, the border included.
+/// @access public
+@mixin nb-magic-surface($gradient) {
+  background-image: $gradient;
+  background-origin: border-box;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  border-color: transparent;
+}
+
+/// Paints the element's text, its descendants' text included, with $gradient. `color` stays as the fallback
+/// where background-clip: text is unsupported. The transparent last layer keeps background-color painting
+/// the whole box instead of only the text. $overlay tints the padding box under the text, see nb-magic-border.
+/// Blink paints text decorations in the transparent fill colour, `currentColor` included, so an underlined
+/// link needs an explicit $decoration-color.
+/// @access public
+@mixin nb-magic-text($gradient, $overlay: transparent, $decoration-color: null) {
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    background-image: $gradient, linear-gradient($overlay, $overlay), linear-gradient(transparent, transparent);
+    background-origin: border-box;
+    -webkit-background-clip: text, padding-box, border-box;
+    background-clip: text, padding-box, border-box;
+    -webkit-text-fill-color: transparent;
+    text-decoration-color: $decoration-color;
+  }
+}
+
+/// A gradient border that keeps the border radius: $fill paints the padding box and $gradient shows only in
+/// the border. A translucent $fill needs an opaque $base under it, or the gradient would shine through.
+/// With $text-gradient the text takes that gradient as well.
+///
+/// Gradient text is background, so the inset box-shadow that nb-outline tints a focused control with would
+/// cover it. Pass that tint as $overlay instead, and drop the inset shadow.
+/// @access public
+@mixin nb-magic-border($gradient, $fill, $base: null, $text-gradient: null, $overlay: null) {
+  $layers: nb-magic-border-layers($gradient, $fill, $base, $overlay);
+
+  border-color: transparent;
+  background-image: list.nth($layers, 1);
+  background-origin: border-box;
+  -webkit-background-clip: list.nth($layers, 2);
+  background-clip: list.nth($layers, 2);
+
+  @if ($text-gradient) {
+    @supports (background-clip: text) or (-webkit-background-clip: text) {
+      background-image: list.join($text-gradient, list.nth($layers, 1), comma);
+      -webkit-background-clip: list.join(text, list.nth($layers, 2), comma);
+      background-clip: list.join(text, list.nth($layers, 2), comma);
+      -webkit-text-fill-color: transparent;
+    }
+  }
+}
+
+@function nb-magic-border-layers($gradient, $fill, $base, $overlay) {
+  $images: (linear-gradient($fill, $fill));
+  $clips: (padding-box);
+  @if ($overlay) {
+    $images: list.join((linear-gradient($overlay, $overlay)), $images, comma);
+    $clips: list.join((padding-box), $clips, comma);
+  }
+  @if ($base) {
+    $images: list.append($images, linear-gradient($base, $base), comma);
+    $clips: list.append($clips, padding-box, comma);
+  }
+  $images: list.append($images, $gradient, comma);
+  $clips: list.append($clips, border-box, comma);
+  @return ($images, $clips);
+}
+
+/// Fills the SVG icons inside the element with an SVG paint server, e.g. nb-theme(magic-svg-gradient).
+/// @access public
+@mixin nb-magic-icons($svg-gradient, $text-gradient) {
+  nb-icon {
+    @include nb-magic-text($text-gradient);
+
+    svg {
+      fill: $svg-gradient;
+    }
+  }
+}
+
+/// Undoes nb-magic-text and nb-magic-icons, e.g. for the disabled state, which is flat on every status.
+/// @access public
+@mixin nb-magic-reset() {
+  background-image: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+
+  nb-icon {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+
+    svg {
+      fill: currentColor;
+    }
+  }
+}

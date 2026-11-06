@@ -1293,6 +1293,11 @@ export class NbSelectComponent
   get control(): boolean {
     return this.status === 'control';
   }
+
+  @HostBinding('class.status-magic')
+  get magic(): boolean {
+    return this.status === 'magic';
+  }
   @HostBinding('class.shape-rectangle')
   get rectangle(): boolean {
     return this.shape === 'rectangle';

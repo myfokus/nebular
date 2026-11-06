@@ -141,6 +141,11 @@ export class NbToastComponent implements OnInit, OnDestroy {
     return this.toast().config.status === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic(): boolean {
+    return this.toast().config.status === 'magic';
+  }
+
   @HostBinding('class.destroy-by-click')
   get destroyByClick(): boolean {
     return this.toast().config.destroyByClick;

@@ -84,6 +84,12 @@ describe('Component: NbToggle', () => {
     expect(testContainerEl.classList.contains('status-info')).toBeTruthy();
   });
 
+  it('Setting `status` to `magic` apply corresponding class to host element', () => {
+    toggle.status = 'magic';
+    fixture.detectChanges();
+    expect(testContainerEl.classList.contains('status-magic')).toBeTruthy();
+  });
+
   describe('state animation', () => {
     beforeEach(() => {
       TestBed.inject(NbLayoutDirectionService).setDirection(NbLayoutDirection.LTR);
@@ -115,8 +121,8 @@ describe('Component: NbToggle', () => {
 
 // Test component with reactive forms
 @Component({
-    template: `<nb-toggle [formControl]="formControl"></nb-toggle>`,
-    standalone: false
+  template: `<nb-toggle [formControl]="formControl"></nb-toggle>`,
+  standalone: false,
 })
 class ToggleWithFormControlComponent {
   formControl = new FormControl();

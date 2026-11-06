@@ -239,6 +239,7 @@ export * from './components/icon/icon.component';
 export * from './components/icon/icon';
 export * from './components/icon/icon-pack';
 export * from './components/icon/icon-libraries';
+export * from './components/icon/magic-gradient.service';
 export * from './components/toggle/toggle.module';
 export * from './components/toggle/toggle.component';
 export * from './components/form-field/form-field.module';

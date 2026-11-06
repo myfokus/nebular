@@ -55,5 +55,65 @@
         }
       }
     }
+
+    &.status-magic {
+      @include nb-magic-border(
+        nb-theme(button-outline-magic-border-image),
+        nb-theme(button-outline-magic-background-color),
+        nb-theme(button-outline-magic-base-color),
+        nb-theme(button-outline-magic-text-image)
+      );
+      @include nb-magic-icons(nb-theme(button-outline-magic-icon-fill), nb-theme(button-outline-magic-text-image));
+
+      &:focus {
+        @include nb-magic-border(
+          nb-theme(button-outline-magic-focus-border-image),
+          nb-theme(button-outline-magic-focus-background-color),
+          nb-theme(button-outline-magic-base-color),
+          nb-theme(button-outline-magic-text-image),
+          nb-theme(button-outline-color)
+        );
+        @include nb-magic-icons(
+          nb-theme(button-outline-magic-focus-icon-fill),
+          nb-theme(button-outline-magic-text-image)
+        );
+
+        &:not(:hover):not(:active) {
+          @include nb-outline(nb-theme(button-outline-width), nb-theme(button-outline-color));
+        }
+      }
+
+      &:hover {
+        @include nb-magic-border(
+          nb-theme(button-outline-magic-hover-border-image),
+          nb-theme(button-outline-magic-hover-background-color),
+          nb-theme(button-outline-magic-base-color),
+          nb-theme(button-outline-magic-text-image)
+        );
+        @include nb-magic-icons(
+          nb-theme(button-outline-magic-hover-icon-fill),
+          nb-theme(button-outline-magic-text-image)
+        );
+      }
+
+      &:active {
+        @include nb-magic-border(
+          nb-theme(button-outline-magic-active-border-image),
+          nb-theme(button-outline-magic-active-background-color),
+          nb-theme(button-outline-magic-base-color),
+          nb-theme(button-outline-magic-text-image)
+        );
+        @include nb-magic-icons(
+          nb-theme(button-outline-magic-active-icon-fill),
+          nb-theme(button-outline-magic-text-image)
+        );
+      }
+
+      &[disabled],
+      &.btn-disabled {
+        @include nb-magic-reset();
+        border-color: nb-theme(button-outline-magic-disabled-border-color);
+      }
+    }
   }
 }

@@ -28,7 +28,7 @@ describe('NbBadgeComponent', () => {
   });
 
   it('should set status class', () => {
-    const statuses: NbComponentStatus[] = ['primary', 'success', 'info', 'warning', 'danger'];
+    const statuses: NbComponentStatus[] = ['primary', 'success', 'info', 'warning', 'danger', 'magic'];
 
     for (const status of statuses) {
       fixture.componentRef.setInput('status', status);

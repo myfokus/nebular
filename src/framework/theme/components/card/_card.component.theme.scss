@@ -71,6 +71,10 @@
       }
     }
 
+    &.status-magic nb-card-header {
+      background-image: nb-theme(card-header-magic-background-image);
+    }
+
     &.accent {
       border-top-style: nb-theme(card-border-style);
       border-top-width: nb-theme(card-border-radius);
@@ -78,6 +82,12 @@
       & nb-card-header {
         border-radius: 0;
       }
+    }
+
+    // A gradient band on the top edge alone would lose the corner radius: magic accents the whole border.
+    &.accent.accent-magic {
+      border-top-width: nb-theme(card-border-width);
+      @include nb-magic-border(nb-theme(card-accent-magic-image), nb-theme(card-background-color));
     }
   }
 

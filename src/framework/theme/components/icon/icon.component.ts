@@ -9,6 +9,7 @@ import {
   Component,
   ElementRef,
   HostBinding,
+  inject,
   Input,
   OnChanges,
   OnInit,
@@ -19,6 +20,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NbStatusService } from '../../services/status.service';
 import { NbComponentOrCustomStatus } from '../component-status';
 import { NbIconLibraries } from './icon-libraries';
+import { NbMagicGradientService } from './magic-gradient.service';
 
 export interface NbIconConfig {
   icon: string;
@@ -108,16 +110,16 @@ export interface NbIconConfig {
  * icon-control-color:
  */
 @Component({
-    selector: 'nb-icon',
-    styleUrls: [`./icon.component.scss`],
-    template: '',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'nb-icon',
+  styleUrls: [`./icon.component.scss`],
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class NbIconComponent implements NbIconConfig, OnChanges, OnInit {
-
   protected iconDef;
   protected prevClasses = [];
+  protected magicGradient = inject(NbMagicGradientService);
 
   @HostBinding('innerHtml')
   html: SafeHtml = '';
@@ -157,6 +159,11 @@ export class NbIconComponent implements NbIconConfig, OnChanges, OnInit {
     return this.status === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status === 'magic';
+  }
+
   @HostBinding('class')
   get additionalClasses(): string[] {
     if (this.statusService.isCustomStatus(this.status)) {
@@ -185,7 +192,7 @@ export class NbIconComponent implements NbIconConfig, OnChanges, OnInit {
 
   /**
    * Icon status (adds specific styles):
-   * `basic`, `primary`, `info`, `success`, `warning`, `danger`, `control`
+   * `basic`, `primary`, `info`, `success`, `warning`, `danger`, `control`, `magic`
    */
   @Input() status?: NbComponentOrCustomStatus;
 
@@ -225,6 +232,8 @@ export class NbIconComponent implements NbIconConfig, OnChanges, OnInit {
   ) {}
 
   ngOnInit() {
+    // Also for icons without a status: a magic button paints the icons inside it.
+    this.magicGradient.addDefs();
     this.iconDef = this.renderIcon(this.icon, this.pack, this.options);
   }
 

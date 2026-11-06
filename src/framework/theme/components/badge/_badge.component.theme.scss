@@ -27,4 +27,8 @@
       background-color: nb-theme(badge-#{$status}-background-color);
     }
   }
+
+  nb-badge.status-magic {
+    background-image: nb-theme(badge-magic-background-image);
+  }
 }

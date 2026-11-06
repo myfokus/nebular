@@ -153,6 +153,93 @@ service's `format` throws `RangeError: Invalid time value`, and the calendar bui
 array and throws `Cannot read properties of undefined (reading 'length')`. `writeValue` now treats it
 as `null` before it is queued or written. Range values are not `Date`s and pass through unchanged.
 
+### Magic status
+
+Fokus marks everything a model produced (Sofi, AI suggestions) with a 45° gradient from
+`color-magic` to `color-magic-alternate`. `magic` is an eighth core status: it is in
+`NbComponentStatus`, `nb-get-core-statuses()` and `NbStatusService.coreStatuses`, every component with a
+`status` input sets `status-magic` on its host (alert and card also `accent-magic` / `outline-magic`),
+and `NbToastrService` has a `magic()` shortcut.
+
+```html
+<button nbButton status="magic">Sofi fragen</button>
+<nb-card accent="magic">…</nb-card>
+<nb-icon icon="file-text-outline" status="magic"></nb-icon>
+```
+
+**Rendering.** `background-color`, `border-color` and `color` can't carry a gradient. Each component
+theme therefore emits magic's solid colours in its status loop like for any other status, and adds a
+`.status-magic` block after the loop that paints the gradient over them (`styles/core/_magic.scss`):
+
+- Surfaces (filled and hero buttons, badge, filled tag, alert, toast, tooltip, card header, chat header
+  and incoming messages, progress fill, checked checkbox and toggle, radio dot): the gradient as
+  `background-image`, border included.
+- Borders (outline buttons and tags, inputs, tag lists, selects, unchecked controls, magic accents and
+  outlines): the padding-box/border-box `background-clip` technique, so the radius stays. A translucent
+  fill sits on `<component>-magic-base-color` (`background-basic-color-1`), or the gradient would shine
+  through it; override that key when such a control sits on another background. Accents are a border all
+  around, not the one-sided band the other statuses use.
+- Text (outline and ghost buttons, outline tags, form-field addons, `.text-magic`,
+  `.caption.status-magic`): `background-clip: text`, with `color` as the fallback. A focused control
+  tints its padding box with an inset box-shadow, which would cover text that is background; magic draws
+  that tint as a background layer instead.
+- Icons: `fill: url(#nb-magic-gradient)`. `NbMagicGradientService` adds the four paint servers
+  (`nb-magic-gradient`, `-focus`, `-hover`, `-active`) to the document once, the first time an `nb-icon`
+  renders; their stop colours come from the theme.
+- Spinner: the gradient masked to the ring. Tooltip arrow: a clipped box instead of a border triangle.
+- Disabled is flat, as on every other status.
+
+The core statuses compile to exactly the CSS they compiled to before: every rule of the prebuilt
+themes is unchanged, and every added rule is a magic one.
+
+**Theme keys.** `_default.scss` adds:
+
+| Keys                                                                                            | Meaning                               |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `color-magic-100…900`, `color-magic-transparent-100…600`                                        | the ramp, `#c365ee` at 500            |
+| `color-magic-alternate-100…900`, `color-magic-alternate`                                        | the end stop's ramp, `#d33fb0` at 500 |
+| `color-magic-{default,hover,focus,active,disabled}` and their `-border` / `-transparent-*` keys | the state keys every status has       |
+| `color-magic-surface-*`, `color-magic-alternate-surface-*`                                      | the stops of text-bearing surfaces    |
+| `magic-gradient`, `-hover`, `-focus`, `-active`                                                 | borders, icons, controls              |
+| `magic-surface-gradient`, `-hover`, `-focus`, `-active`                                         | surfaces with text                    |
+| `magic-text-gradient` (stops `text-magic-color`, `text-magic-alternate-color`)                  | gradient text                         |
+| `magic-svg-gradient`, `-hover`, `-focus`, `-active`                                             | the icon paint servers                |
+
+White on `#c365ee` is only 3.3:1, so text-bearing surfaces start one step darker: every surface stop
+carries white at 4.5:1 or more, as does the text gradient on the basic backgrounds. `_dark.scss` swaps
+in lighter text stops for the same reason.
+
+`_mapping.scss` has every `<component>-magic-*` key the other statuses have, plus the gradient ones:
+`-background-image`, `-border-image`, `-text-image`, `-icon-fill`, `-inner-circle-image` and
+`-base-color`.
+
+A gradient key holds `nb-linear-gradient($angle, $start, $end)`, whose stops are theme keys or colours.
+Both theming modes resolve it: css-custom-properties emits `linear-gradient(45deg, var(--start),
+var(--end))`, the scss-vars mode the resolved colours. A consuming app overrides magic like any other
+status:
+
+```scss
+$nb-themes: nb-register-theme(
+  (
+    color-magic-500: #b05ae0,
+    color-magic-alternate-500: #c93aa5,
+    magic-gradient: nb-linear-gradient(135deg, color-magic-default, color-magic-alternate-default),
+    button-filled-magic-background-image: magic-gradient,
+  ),
+  default,
+  default
+);
+```
+
+`nb-linear-gradient` comes with `@use '@myfokus/nebular-theme/styles/theming' as *`. A plain
+`linear-gradient(...)` string works as a value too, but its stops are then literal colours.
+
+**Playground.** `/magic/magic-gallery.component` shows every component with magic next to primary, in
+every appearance, size and state. `?section=button` limits it to one component and `?theme=dark` switches
+the theme. Hover, focus and active are forced by copying every `:hover`/`:focus`/`:active` rule into one
+that matches inside a `.npg-force-<state>` wrapper (`magic/force-states.ts`), so the page renders the
+components' real styles.
+
 ### CI and release
 
 - `.github/workflows/pr-check.yml` is **replaced**. Upstream's version builds the docs site, the

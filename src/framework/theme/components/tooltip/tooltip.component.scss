@@ -42,6 +42,14 @@ $arrow-size: 6px;
   }
 }
 
+// A border triangle can't take the magic gradient: the arrow becomes a clipped box of the same size instead.
+:host(.status-magic) .arrow {
+  width: $arrow-size * 2;
+  height: $arrow-size;
+  border: none;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
 :host(.bottom) {
   .arrow {
     top: -$arrow-size;

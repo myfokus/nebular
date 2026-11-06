@@ -10,7 +10,7 @@ import { NbComponentOrCustomStatus, NbComponentStatus } from '../components/comp
 
 @Injectable()
 export class NbStatusService {
-  readonly coreStatuses: NbComponentStatus[] = ['basic', 'primary', 'info', 'warning', 'danger', 'control'];
+  readonly coreStatuses: NbComponentStatus[] = ['basic', 'primary', 'info', 'warning', 'danger', 'control', 'magic'];
 
   isCoreStatus(status: NbComponentOrCustomStatus): boolean {
     return this.coreStatuses.includes(status as NbComponentStatus);

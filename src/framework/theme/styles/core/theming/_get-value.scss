@@ -7,9 +7,18 @@
 @use 'sass:map';
 @use '../../theming-variables';
 @use '../functions';
+@use 'gradient';
 @use 'register';
 
 @function nb-deep-find-value($theme, $key, $value) {
+  @if (gradient.nb-is-gradient($value)) {
+    @return gradient.nb-gradient-css(
+      gradient.nb-gradient-part($value, angle),
+      nb-find-gradient-stop($theme, gradient.nb-gradient-part($value, start)),
+      nb-find-gradient-stop($theme, gradient.nb-gradient-part($value, end))
+    );
+  }
+
   $parent-value: map.get($theme, $value);
 
   @if ($parent-value != null) {
@@ -17,6 +26,14 @@
   }
 
   @return $value;
+}
+
+@function nb-find-gradient-stop($theme, $stop) {
+  $value: map.get($theme, $stop);
+  @if ($value == null) {
+    @return $stop;
+  }
+  @return nb-deep-find-value($theme, $stop, $value);
 }
 
 @function nb-process-theme($theme) {

@@ -1,0 +1,37 @@
+/**
+ * @license
+ * Copyright Akveo. All Rights Reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ */
+
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:string';
+
+// A theme value can't hold `linear-gradient(45deg, color-magic-default, ...)` as a string: its stops
+// would stay key names. A gradient value is therefore a map, and both the css-custom-properties
+// install and the scss-vars lookup resolve its stops against the theme like any other key reference.
+
+/// Theme value for a linear gradient whose stops are theme keys or colors.
+/// @access public
+@function nb-linear-gradient($angle, $start, $end) {
+  @return (
+    nb-linear-gradient: (
+      angle: $angle,
+      start: $start,
+      end: $end,
+    )
+  );
+}
+
+@function nb-is-gradient($value) {
+  @return meta.type-of($value) == 'map' and map.has-key($value, nb-linear-gradient);
+}
+
+@function nb-gradient-part($value, $part) {
+  @return map.get(map.get($value, nb-linear-gradient), $part);
+}
+
+@function nb-gradient-css($angle, $start, $end) {
+  @return string.unquote('linear-gradient(#{$angle}, #{$start}, #{$end})');
+}

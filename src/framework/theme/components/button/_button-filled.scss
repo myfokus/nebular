@@ -47,5 +47,27 @@
         }
       }
     }
+
+    &.status-magic {
+      @include nb-magic-surface(nb-theme(button-filled-magic-background-image));
+
+      &:focus {
+        @include nb-magic-surface(nb-theme(button-filled-magic-focus-background-image));
+      }
+
+      &:hover {
+        @include nb-magic-surface(nb-theme(button-filled-magic-hover-background-image));
+      }
+
+      &:active {
+        @include nb-magic-surface(nb-theme(button-filled-magic-active-background-image));
+      }
+
+      &[disabled],
+      &.btn-disabled {
+        @include nb-magic-reset();
+        border-color: nb-theme(button-filled-magic-disabled-border-color);
+      }
+    }
   }
 }

@@ -246,6 +246,11 @@ export class NbCardComponent {
     return this.status() === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status() === 'magic';
+  }
+
   @HostBinding('class.accent')
   get hasAccent() {
     return this.accent();
@@ -284,6 +289,11 @@ export class NbCardComponent {
   @HostBinding('class.accent-control')
   get controlAccent() {
     return this.accent() === 'control';
+  }
+
+  @HostBinding('class.accent-magic')
+  get magicAccent() {
+    return this.accent() === 'magic';
   }
 
   @HostBinding('class')

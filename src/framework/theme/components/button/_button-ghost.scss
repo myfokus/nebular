@@ -55,5 +55,37 @@
         }
       }
     }
+
+    &.status-magic {
+      @include nb-magic-text(nb-theme(button-ghost-magic-text-image));
+      @include nb-magic-icons(nb-theme(button-ghost-magic-icon-fill), nb-theme(button-ghost-magic-text-image));
+
+      &:focus {
+        @include nb-magic-text(nb-theme(button-ghost-magic-text-image), nb-theme(button-outline-color));
+        @include nb-magic-icons(nb-theme(button-ghost-magic-focus-icon-fill), nb-theme(button-ghost-magic-text-image));
+
+        &:not(:hover):not(:active) {
+          @include nb-outline(nb-theme(button-outline-width), nb-theme(button-outline-color));
+        }
+      }
+
+      &:focus:hover,
+      &:focus:active {
+        @include nb-magic-text(nb-theme(button-ghost-magic-text-image));
+      }
+
+      &:hover {
+        @include nb-magic-icons(nb-theme(button-ghost-magic-hover-icon-fill), nb-theme(button-ghost-magic-text-image));
+      }
+
+      &:active {
+        @include nb-magic-icons(nb-theme(button-ghost-magic-active-icon-fill), nb-theme(button-ghost-magic-text-image));
+      }
+
+      &[disabled],
+      &.btn-disabled {
+        @include nb-magic-reset();
+      }
+    }
   }
 }

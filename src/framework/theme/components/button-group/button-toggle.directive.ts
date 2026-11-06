@@ -36,10 +36,10 @@ export interface NbButtonToggleChange {
  * `[nbButtonToggle]` is a directive to add a `pressed` state to a button.
  */
 @Directive({
-    selector: 'button[nbButtonToggle]',
-    providers: [{ provide: NbButton, useExisting: NbButtonToggleDirective }],
-    exportAs: 'nbButtonToggle',
-    standalone: false
+  selector: 'button[nbButtonToggle]',
+  providers: [{ provide: NbButton, useExisting: NbButtonToggleDirective }],
+  exportAs: 'nbButtonToggle',
+  standalone: false,
 })
 export class NbButtonToggleDirective extends NbButton {
   protected readonly _pressedChange$ = new Subject<NbButtonToggleChange>();
@@ -112,6 +112,11 @@ export class NbButtonToggleDirective extends NbButton {
   @HostBinding('class.status-control')
   get control(): boolean {
     return this.pressed && this.status === 'control';
+  }
+
+  @HostBinding('class.status-magic')
+  get magic(): boolean {
+    return this.pressed && this.status === 'magic';
   }
 
   @HostBinding('class')

@@ -139,6 +139,11 @@ export class NbSpinnerComponent {
     return this.status() === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status() === 'magic';
+  }
+
   @HostBinding('class')
   get additionalClasses(): string[] {
     if (this.statusService.isCustomStatus(this.status())) {

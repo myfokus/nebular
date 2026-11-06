@@ -26,6 +26,12 @@ describe('Component: NbProgressBar', () => {
     expect(fixture.nativeElement.classList).toContain('status-danger');
   });
 
+  it('Setting status magic should set class magic', () => {
+    fixture.componentRef.setInput('status', 'magic');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.classList).toContain('status-magic');
+  });
+
   it('Setting size should set class', () => {
     fixture.componentRef.setInput('size', 'small');
     fixture.detectChanges();
