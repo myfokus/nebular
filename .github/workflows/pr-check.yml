@@ -22,6 +22,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            packages-smoke/package-lock.json
 
       # package-lock.json is written by npm 11, which records optional and peer dependencies
       # differently from the npm 10 that ships with Node 22. Without this, npm ci rejects the
@@ -33,6 +36,16 @@ jobs:
       - run: npm run lint
 
       - run: npm run build:myfokus
+
+      # Installs the packages just built into the smoke app and builds it with SSR, the way a consumer
+      # would. Also keeps packages-smoke/package-lock.json honest: npm ci fails as soon as it drifts.
+      - name: Build packages-smoke against the built packages
+        working-directory: packages-smoke
+        run: |
+          mkdir .lib
+          cp -r ../dist/theme ../dist/date-fns ../dist/eva-icons .lib/
+          npm ci
+          npm run build -- --configuration=production
 
       # Deliberately not test:myfokus. The theme suite is red on upstream v17.0.0 too (162 failing
       # there, 101 here - see "Test suite state" in the README), so gating on it would mean a
