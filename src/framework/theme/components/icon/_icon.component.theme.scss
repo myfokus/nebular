@@ -28,7 +28,7 @@
     @include nb-magic-text(nb-theme(icon-magic-text-image));
 
     svg {
-      fill: nb-theme(icon-magic-fill);
+      fill: nb-theme(icon-magic-fill) currentColor;
     }
   }
 

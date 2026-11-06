@@ -85,7 +85,9 @@
     border-color: transparent;
 
     &.destroy-by-click:hover {
+      // The status loop's hover `background` shorthand resets the origin.
       background-image: nb-theme(toastr-destroyable-magic-hover-background-image);
+      background-origin: border-box;
       border-color: transparent;
     }
 

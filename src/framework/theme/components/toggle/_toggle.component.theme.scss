@@ -125,7 +125,7 @@
     }
 
     .toggle-switcher nb-icon svg {
-      fill: nb-theme(toggle-magic-checked-switcher-checkmark-fill);
+      fill: nb-theme(toggle-magic-checked-switcher-checkmark-fill) currentColor;
     }
 
     .native-input:disabled + .toggle {

@@ -88,6 +88,11 @@
     &.accent.accent-magic {
       border-top-width: nb-theme(card-border-width);
       @include nb-magic-border(nb-theme(card-accent-magic-image), nb-theme(card-background-color));
+
+      & nb-card-header {
+        border-top-left-radius: nb-theme(card-border-radius);
+        border-top-right-radius: nb-theme(card-border-radius);
+      }
     }
   }
 

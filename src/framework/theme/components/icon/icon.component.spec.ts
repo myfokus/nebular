@@ -75,4 +75,14 @@ describe('Component: NbIcon', () => {
       expect(document.getElementById(id)).not.toBeNull();
     }
   });
+
+  it('should add the magic gradient paint servers again once they were removed', () => {
+    iconTestComponent.icon = 'home';
+    fixture.detectChanges();
+    document.querySelectorAll('.nb-magic-gradient-defs').forEach((defs) => defs.remove());
+
+    TestBed.createComponent(IconTestComponent).detectChanges();
+
+    expect(document.querySelectorAll('.nb-magic-gradient-defs').length).toBe(1);
+  });
 });

@@ -7,6 +7,8 @@
 import { DOCUMENT } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 
+import { NB_DOCUMENT } from '../../theme.options';
+
 const MAGIC_GRADIENT_STATES = ['', 'focus', 'hover', 'active'] as const;
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -18,15 +20,11 @@ const DEFS_CLASS = 'nb-magic-gradient-defs';
  */
 @Injectable({ providedIn: 'root' })
 export class NbMagicGradientService {
-  protected document = inject(DOCUMENT);
-  protected added = false;
+  protected document: Document = inject(NB_DOCUMENT, { optional: true }) ?? inject(DOCUMENT);
 
   addDefs() {
-    if (this.added || !this.document?.body) {
-      return;
-    }
-    this.added = true;
-    if (this.document.body.querySelector(`.${DEFS_CLASS}`)) {
+    // Checks the DOM instead of remembering, so defs removed with the body's content come back.
+    if (!this.document?.body || this.document.body.querySelector(`.${DEFS_CLASS}`)) {
       return;
     }
 

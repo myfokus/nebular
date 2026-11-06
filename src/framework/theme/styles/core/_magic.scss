@@ -79,14 +79,15 @@
   @return ($images, $clips);
 }
 
-/// Fills the SVG icons inside the element with an SVG paint server, e.g. nb-theme(magic-svg-gradient).
+/// Fills the SVG icons inside the element with an SVG paint server, e.g. nb-theme(magic-svg-gradient), and
+/// with the solid `color` where the paint server can't be resolved.
 /// @access public
 @mixin nb-magic-icons($svg-gradient, $text-gradient) {
   nb-icon {
     @include nb-magic-text($text-gradient);
 
     svg {
-      fill: $svg-gradient;
+      fill: $svg-gradient currentColor;
     }
   }
 }

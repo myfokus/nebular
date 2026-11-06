@@ -69,6 +69,13 @@
 
   nb-alert.status-magic {
     background-image: nb-theme(alert-magic-background-image);
+
+    // The surface is the gradient already: a magic accent or outline only extends it into the border.
+    &.accent-magic,
+    &.outline-magic {
+      border: nb-theme(alert-outline-width) solid transparent;
+      @include nb-magic-surface(nb-theme(alert-magic-background-image));
+    }
   }
 
   // A magic accent or outline is a gradient border all around: a one-sided gradient would lose the radius.
