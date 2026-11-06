@@ -33,5 +33,44 @@
         }
       }
     }
+
+    &.status-magic {
+      $base: nb-theme(tag-outline-magic-base-color);
+      $text: nb-theme(tag-outline-magic-text-image);
+
+      @include nb-magic-border(
+        nb-theme(tag-outline-magic-border-image),
+        nb-theme(tag-outline-magic-background-color),
+        $base,
+        $text
+      );
+
+      &.selected {
+        @include nb-magic-border(
+          nb-theme(tag-outline-magic-selected-border-image),
+          nb-theme(tag-outline-magic-selected-background-color),
+          $base,
+          $text
+        );
+      }
+
+      &.active {
+        @include nb-magic-border(
+          nb-theme(tag-outline-magic-active-border-image),
+          nb-theme(tag-outline-magic-active-background-color),
+          $base,
+          $text
+        );
+      }
+
+      &:hover {
+        @include nb-magic-border(
+          nb-theme(tag-outline-magic-hover-border-image),
+          nb-theme(tag-outline-magic-hover-background-color),
+          $base,
+          $text
+        );
+      }
+    }
   }
 }

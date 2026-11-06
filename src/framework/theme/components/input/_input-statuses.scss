@@ -41,4 +41,26 @@
       }
     }
   }
+
+  &.status-magic {
+    @include nb-magic-border(nb-theme(input-magic-border-image), nb-theme(input-magic-background-color));
+
+    &:focus {
+      @include nb-magic-border(nb-theme(input-magic-focus-border-image), nb-theme(input-magic-focus-background-color));
+    }
+    &:hover {
+      @include nb-magic-border(nb-theme(input-magic-hover-border-image), nb-theme(input-magic-hover-background-color));
+    }
+    &:focus:hover {
+      @include nb-magic-border(
+        nb-theme(input-magic-focus-and-hover-border-image),
+        nb-theme(input-magic-focus-and-hover-background-color)
+      );
+    }
+
+    &:disabled {
+      @include nb-magic-reset();
+      border-color: nb-theme(input-magic-disabled-border-color);
+    }
+  }
 }

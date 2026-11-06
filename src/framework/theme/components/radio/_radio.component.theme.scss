@@ -106,6 +106,90 @@
       }
     }
 
+    &.status-magic {
+      $base: nb-theme(radio-magic-base-color);
+
+      .native-input:enabled + .outer-circle {
+        @include nb-magic-border(nb-theme(radio-magic-border-image), nb-theme(radio-magic-background-color), $base);
+      }
+
+      .native-input:enabled:checked {
+        & + .outer-circle {
+          @include nb-magic-border(
+            nb-theme(radio-magic-checked-border-image),
+            nb-theme(radio-magic-checked-background-color),
+            $base
+          );
+        }
+        & ~ .inner-circle {
+          background-image: nb-theme(radio-magic-inner-circle-image);
+        }
+      }
+
+      .native-input:enabled:focus + .outer-circle {
+        @include nb-magic-border(
+          nb-theme(radio-magic-focus-border-image),
+          nb-theme(radio-magic-focus-background-color),
+          $base
+        );
+      }
+
+      .native-input:enabled:checked:focus {
+        & + .outer-circle {
+          @include nb-magic-border(
+            nb-theme(radio-magic-focus-checked-border-image),
+            nb-theme(radio-magic-focus-checked-background-color),
+            $base
+          );
+        }
+        & ~ .inner-circle {
+          background-image: nb-theme(radio-magic-focus-inner-circle-image);
+        }
+      }
+
+      label:hover .native-input:enabled + .outer-circle {
+        @include nb-magic-border(
+          nb-theme(radio-magic-hover-border-image),
+          nb-theme(radio-magic-hover-background-color),
+          $base
+        );
+      }
+
+      label:hover .native-input:checked:enabled {
+        + .outer-circle {
+          @include nb-magic-border(
+            nb-theme(radio-magic-hover-checked-border-image),
+            nb-theme(radio-magic-hover-checked-background-color),
+            $base
+          );
+        }
+        ~ .inner-circle {
+          background-image: nb-theme(radio-magic-hover-inner-circle-image);
+        }
+      }
+
+      label .native-input:enabled:active + .outer-circle {
+        @include nb-magic-border(
+          nb-theme(radio-magic-active-border-image),
+          nb-theme(radio-magic-active-background-color),
+          $base
+        );
+      }
+
+      label .native-input:enabled:checked:active {
+        & + .outer-circle {
+          @include nb-magic-border(
+            nb-theme(radio-magic-active-checked-border-image),
+            nb-theme(radio-magic-active-checked-background-color),
+            $base
+          );
+        }
+        & ~ .inner-circle {
+          background-image: nb-theme(radio-magic-active-inner-circle-image);
+        }
+      }
+    }
+
     .text {
       font-family: nb-theme(radio-text-font-family);
       font-size: nb-theme(radio-text-font-size);

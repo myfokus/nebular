@@ -252,38 +252,52 @@ import { convertToBoolProperty, NbBooleanInput } from '../helpers';
  * checkbox-control-disabled-checked-background-color:
  */
 @Component({
-    selector: 'nb-checkbox',
-    template: `
+  selector: 'nb-checkbox',
+  template: `
     <label class="label">
-      <input type="checkbox" class="native-input visually-hidden"
-             [disabled]="disabled"
-             [checked]="checked"
-             (change)="updateValueAndIndeterminate($event)"
-             (blur)="setTouched()"
-             (click)="$event.stopPropagation()"
-             [indeterminate]="indeterminate">
+      <input
+        type="checkbox"
+        class="native-input visually-hidden"
+        [disabled]="disabled"
+        [checked]="checked"
+        (change)="updateValueAndIndeterminate($event)"
+        (blur)="setTouched()"
+        (click)="$event.stopPropagation()"
+        [indeterminate]="indeterminate"
+      />
       <span [class.indeterminate]="indeterminate" [class.checked]="checked" class="custom-checkbox">
-        <nb-icon *ngIf="indeterminate" icon="minus-bold-outline" pack="nebular-essentials" class="custom-checkbox-icon"></nb-icon>
-        <nb-icon *ngIf="checked && !indeterminate" icon="checkmark-bold-outline" pack="nebular-essentials" class="custom-checkbox-icon"></nb-icon>
+        <nb-icon
+          *ngIf="indeterminate"
+          icon="minus-bold-outline"
+          pack="nebular-essentials"
+          class="custom-checkbox-icon"
+        ></nb-icon>
+        <nb-icon
+          *ngIf="checked && !indeterminate"
+          icon="checkmark-bold-outline"
+          pack="nebular-essentials"
+          class="custom-checkbox-icon"
+        ></nb-icon>
       </span>
       <span class="text">
         <ng-content></ng-content>
       </span>
     </label>
   `,
-    styleUrls: [`./checkbox.component.scss`],
-    providers: [{
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => NbCheckboxComponent),
-            multi: true,
-        }],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  styleUrls: [`./checkbox.component.scss`],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => NbCheckboxComponent),
+      multi: true,
+    },
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class NbCheckboxComponent implements AfterViewInit, ControlValueAccessor {
-
-  onChange: any = () => { };
-  onTouched: any = () => { };
+  onChange: any = () => {};
+  onTouched: any = () => {};
 
   @Input()
   get checked(): boolean {
@@ -368,6 +382,11 @@ export class NbCheckboxComponent implements AfterViewInit, ControlValueAccessor 
     return this.status === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status === 'magic';
+  }
+
   @HostBinding('class')
   get additionalClasses(): string[] {
     if (this.statusService.isCustomStatus(this.status)) {
@@ -386,9 +405,11 @@ export class NbCheckboxComponent implements AfterViewInit, ControlValueAccessor 
 
   ngAfterViewInit() {
     // TODO: #2254
-    this.zone.runOutsideAngular(() => setTimeout(() => {
-      this.renderer.addClass(this.hostElement.nativeElement, 'nb-transition');
-    }));
+    this.zone.runOutsideAngular(() =>
+      setTimeout(() => {
+        this.renderer.addClass(this.hostElement.nativeElement, 'nb-transition');
+      }),
+    );
   }
 
   registerOnChange(fn: any) {
@@ -414,7 +435,7 @@ export class NbCheckboxComponent implements AfterViewInit, ControlValueAccessor 
   }
 
   updateValueAndIndeterminate(event: Event): void {
-    const input = (event.target as HTMLInputElement);
+    const input = event.target as HTMLInputElement;
     this.checked = input.checked;
     this.checkedChange.emit(this.checked);
     this.onChange(this.checked);

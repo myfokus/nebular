@@ -30,5 +30,21 @@
         }
       }
     }
+
+    &.status-magic {
+      @include nb-magic-surface(nb-theme(tag-filled-magic-background-image));
+
+      &.selected {
+        @include nb-magic-surface(nb-theme(tag-filled-magic-selected-background-image));
+      }
+
+      &.active {
+        @include nb-magic-surface(nb-theme(tag-filled-magic-active-background-image));
+      }
+
+      &:hover {
+        @include nb-magic-surface(nb-theme(tag-filled-magic-hover-background-image));
+      }
+    }
   }
 }

@@ -36,6 +36,19 @@
     }
   }
 
+  .nb-form-field-addon-magic {
+    @include nb-magic-text(nb-theme(form-field-addon-magic-text-image));
+    @include nb-magic-icons(nb-theme(form-field-addon-magic-icon-fill), nb-theme(form-field-addon-magic-text-image));
+
+    &-highlight {
+      @include nb-magic-text(nb-theme(form-field-addon-magic-highlight-text-image));
+      @include nb-magic-icons(
+        nb-theme(form-field-addon-magic-highlight-icon-fill),
+        nb-theme(form-field-addon-magic-highlight-text-image)
+      );
+    }
+  }
+
   @each $size in nb-get-sizes() {
     $form-field-max-width: nb-theme(form-field-#{$size}-max-width);
     $addon-height: nb-theme(form-field-addon-#{$size}-height);

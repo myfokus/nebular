@@ -1,0 +1,85 @@
+@use '../../styles/themes' as *;
+
+@include nb-install-component() {
+  display: block;
+
+  .npg-magic-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  h6 {
+    margin: 1rem 0 0.5rem;
+  }
+
+  .npg-magic-grid {
+    border-spacing: 1rem 0.75rem;
+
+    th {
+      font-weight: 600;
+      text-align: left;
+      color: nb-theme(text-hint-color);
+    }
+  }
+
+  .npg-magic-wide {
+    width: 100%;
+
+    td {
+      width: 100%;
+    }
+  }
+
+  .npg-magic-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .npg-magic-columns {
+    display: flex;
+    gap: 1.5rem;
+
+    > * {
+      flex: 1;
+    }
+  }
+
+  .npg-magic-card {
+    width: 16rem;
+    margin: 0;
+  }
+
+  .npg-magic-badge-host {
+    position: relative;
+    display: inline-block;
+    padding: 1rem 2.5rem 0.5rem 0.5rem;
+    border: 1px dashed nb-theme(border-basic-color-4);
+  }
+
+  .npg-magic-tooltip-space {
+    padding: 3rem 1rem;
+    gap: 3rem;
+  }
+
+  .npg-magic-overlay-space {
+    min-height: 24rem;
+  }
+
+  .npg-magic-spinner-box {
+    position: relative;
+    width: 5rem;
+    height: 4rem;
+  }
+
+  .npg-magic-icons nb-icon {
+    font-size: 2rem;
+  }
+
+  .npg-magic-chat {
+    width: 22rem;
+  }
+}

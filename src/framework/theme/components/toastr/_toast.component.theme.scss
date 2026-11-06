@@ -78,4 +78,21 @@
   .toastr-overlay-container {
     z-index: 1041;
   }
+
+  nb-toast.status-magic {
+    background-image: nb-theme(toastr-magic-background-image);
+    background-origin: border-box;
+    border-color: transparent;
+
+    &.destroy-by-click:hover {
+      // The status loop's hover `background` shorthand resets the origin.
+      background-image: nb-theme(toastr-destroyable-magic-hover-background-image);
+      background-origin: border-box;
+      border-color: transparent;
+    }
+
+    .icon-container {
+      @include nb-magic-icons(nb-theme(toastr-icon-magic-fill), nb-theme(toastr-icon-magic-text-image));
+    }
+  }
 }

@@ -382,6 +382,11 @@ export class NbChatComponent implements AfterViewInit {
     return this.status() === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic(): boolean {
+    return this.status() === 'magic';
+  }
+
   @HostBinding('class')
   get additionalClasses(): string[] {
     if (this.statusService.isCustomStatus(this.status())) {

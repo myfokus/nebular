@@ -375,4 +375,11 @@ export class NbToastrService {
   control(message, title?, config?: Partial<NbToastrConfig>): NbToastRef {
     return this.default(message, title, { ...config, status: 'control' });
   }
+
+  /**
+   * Shows magic toast with message, title and user config.
+   * */
+  magic(message, title?, config?: Partial<NbToastrConfig>): NbToastRef {
+    return this.show(message, title, { ...config, status: 'magic' });
+  }
 }

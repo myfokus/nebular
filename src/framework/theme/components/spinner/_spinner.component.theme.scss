@@ -32,6 +32,20 @@
     }
   }
 
+  // Borders can't take a gradient: the magic ring is the gradient masked to the ring, with the same gap.
+  nb-spinner.status-magic .spin-circle {
+    $ring-mask: radial-gradient(farthest-side, transparent calc(100% - 0.125em), #000 calc(100% - 0.125em + 0.5px));
+    $gap-mask: conic-gradient(from 45deg, transparent 0 25%, #000 25%);
+
+    border-color: transparent;
+    background-image: nb-theme(spinner-magic-circle-image);
+    background-origin: border-box;
+    -webkit-mask: $ring-mask, $gap-mask;
+    -webkit-mask-composite: source-in;
+    mask: $ring-mask, $gap-mask;
+    mask-composite: intersect;
+  }
+
   @each $size in nb-get-sizes() {
     nb-spinner.size-#{$size} {
       font-size: nb-theme(spinner-height-#{$size});

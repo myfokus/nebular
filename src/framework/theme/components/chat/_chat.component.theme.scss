@@ -74,6 +74,17 @@
     }
   }
 
+  nb-chat.status-magic {
+    .header {
+      background-image: nb-theme(chat-magic-background-image);
+    }
+
+    nb-chat-message.not-reply nb-chat-message-text .text,
+    .nb-custom-message-not-reply {
+      background-image: nb-theme(chat-magic-message-background-image);
+    }
+  }
+
   nb-chat-message {
     margin-bottom: 1.5rem;
     display: flex;

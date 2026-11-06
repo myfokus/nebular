@@ -92,6 +92,7 @@ export class NbToastrConfig {
     primary: 'email-outline',
     control: 'email-outline',
     basic: 'email-outline',
+    magic: 'email-outline',
   };
 
   constructor(config: Partial<NbToastrConfig>) {

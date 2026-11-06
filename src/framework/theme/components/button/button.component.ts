@@ -526,15 +526,11 @@ import { NbButton } from './base-button';
  * button-hero-control-disabled-text-color:
  */
 @Component({
-    selector: 'button[nbButton],a[nbButton],input[type="button"][nbButton],input[type="submit"][nbButton]',
-    template: `
-    <ng-content></ng-content>
-  `,
-    providers: [
-        { provide: NbButton, useExisting: NbButtonComponent },
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'button[nbButton],a[nbButton],input[type="button"][nbButton],input[type="submit"][nbButton]',
+  template: ` <ng-content></ng-content> `,
+  providers: [{ provide: NbButton, useExisting: NbButtonComponent }],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class NbButtonComponent extends NbButton implements AfterViewInit {
   /**
@@ -585,6 +581,11 @@ export class NbButtonComponent extends NbButton implements AfterViewInit {
   @HostBinding('class.status-control')
   get control() {
     return this.status === 'control';
+  }
+
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status === 'magic';
   }
 
   /**

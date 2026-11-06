@@ -217,14 +217,11 @@ import { NbFocusMonitor } from '../cdk/a11y/a11y.module';
  * input-giant-max-width:
  */
 @Directive({
-    selector: 'input[nbInput],textarea[nbInput]',
-    providers: [
-        { provide: NbFormFieldControl, useExisting: NbInputDirective },
-    ],
-    standalone: false
+  selector: 'input[nbInput],textarea[nbInput]',
+  providers: [{ provide: NbFormFieldControl, useExisting: NbInputDirective }],
+  standalone: false,
 })
 export class NbInputDirective implements DoCheck, OnChanges, OnInit, AfterViewInit, OnDestroy, NbFormFieldControl {
-
   protected destroy$ = new Subject<void>();
 
   /**
@@ -273,8 +270,7 @@ export class NbInputDirective implements DoCheck, OnChanges, OnInit, AfterViewIn
     protected renderer: Renderer2,
     protected zone: NgZone,
     protected statusService: NbStatusService,
-  ) {
-  }
+  ) {}
 
   ngDoCheck() {
     const isDisabled = this.elementRef.nativeElement.disabled;
@@ -296,9 +292,10 @@ export class NbInputDirective implements DoCheck, OnChanges, OnInit, AfterViewIn
   }
 
   ngOnInit() {
-    this.focusMonitor.monitor(this.elementRef)
+    this.focusMonitor
+      .monitor(this.elementRef)
       .pipe(
-        map(origin => !!origin),
+        map((origin) => !!origin),
         finalize(() => this.focusMonitor.stopMonitoring(this.elementRef)),
         takeUntil(this.destroy$),
       )
@@ -307,9 +304,11 @@ export class NbInputDirective implements DoCheck, OnChanges, OnInit, AfterViewIn
 
   ngAfterViewInit() {
     // TODO: #2254
-    this.zone.runOutsideAngular(() => setTimeout(() => {
-      this.renderer.addClass(this.elementRef.nativeElement, 'nb-transition');
-    }));
+    this.zone.runOutsideAngular(() =>
+      setTimeout(() => {
+        this.renderer.addClass(this.elementRef.nativeElement, 'nb-transition');
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -374,6 +373,11 @@ export class NbInputDirective implements DoCheck, OnChanges, OnInit, AfterViewIn
   @HostBinding('class.status-control')
   get control() {
     return this.status === 'control';
+  }
+
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status === 'magic';
   }
 
   @HostBinding('class.shape-rectangle')

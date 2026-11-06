@@ -32,6 +32,12 @@ $theme: (
   text-disabled-color: color-basic-transparent-600,
   shadow: 0 0.5rem 1rem 0 #1a1f33,
   outline-color: color-basic-700,
+  // The light theme's magic text stops fall below 4.5:1 on the dark backgrounds; the lighter ones stay above.
+  text-magic-color: color-magic-400,
+  text-magic-alternate-color: color-magic-alternate-400,
+  text-magic-focus-color: color-magic-300,
+  text-magic-hover-color: color-magic-400,
+  text-magic-active-color: color-magic-300,
 );
 
 // register the theme

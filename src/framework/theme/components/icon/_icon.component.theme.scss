@@ -23,4 +23,25 @@
       color: nb-theme(icon-#{$status}-color);
     }
   }
+
+  nb-icon.status-magic {
+    @include nb-magic-text(nb-theme(icon-magic-text-image));
+
+    svg {
+      fill: nb-theme(icon-magic-fill) currentColor;
+    }
+  }
+
+  // The paint servers behind magic-svg-gradient*, added to the document by NbMagicGradientService
+  @each $id, $state in ('': default, '-focus': focus, '-hover': hover, '-active': active) {
+    [id='nb-magic-gradient#{$id}'] {
+      .nb-magic-gradient-start {
+        stop-color: nb-theme(color-magic-#{$state});
+      }
+
+      .nb-magic-gradient-end {
+        stop-color: nb-theme(color-magic-alternate-#{$state});
+      }
+    }
+  }
 }

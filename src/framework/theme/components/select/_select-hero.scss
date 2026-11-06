@@ -1,4 +1,5 @@
 @use '../../styles/theming' as *;
+@use 'select-magic';
 @use '../form-field/form-field.component.theme' as form-field-theme;
 
 @mixin select-hero {
@@ -59,4 +60,6 @@
       }
     }
   }
+
+  @include select-magic.select-hero-magic('nb-select');
 }

@@ -74,6 +74,65 @@
   @each $status in nb-get-statuses() {
     @include nb-toggle-status($status);
   }
+
+  nb-toggle.status-magic {
+    $base: nb-theme(toggle-magic-base-color);
+
+    .toggle {
+      @include nb-magic-border(nb-theme(toggle-magic-border-image), nb-theme(toggle-magic-background-color), $base);
+    }
+
+    .toggle.checked {
+      @include nb-magic-surface(nb-theme(toggle-magic-checked-background-image));
+    }
+
+    .native-input:enabled {
+      &:focus + .toggle {
+        @include nb-magic-border(
+          nb-theme(toggle-magic-focus-border-image),
+          nb-theme(toggle-magic-focus-background-color),
+          $base
+        );
+
+        &.checked {
+          @include nb-magic-surface(nb-theme(toggle-magic-focus-checked-background-image));
+        }
+      }
+
+      &:active + .toggle {
+        @include nb-magic-border(
+          nb-theme(toggle-magic-active-border-image),
+          nb-theme(toggle-magic-active-background-color),
+          $base
+        );
+
+        &.checked {
+          @include nb-magic-surface(nb-theme(toggle-magic-active-checked-background-image));
+        }
+      }
+    }
+
+    .native-input:enabled + .toggle:hover {
+      @include nb-magic-border(
+        nb-theme(toggle-magic-hover-border-image),
+        nb-theme(toggle-magic-hover-background-color),
+        $base
+      );
+
+      &.checked {
+        @include nb-magic-surface(nb-theme(toggle-magic-hover-checked-background-image));
+      }
+    }
+
+    .toggle-switcher nb-icon svg {
+      fill: nb-theme(toggle-magic-checked-switcher-checkmark-fill) currentColor;
+    }
+
+    .native-input:disabled + .toggle {
+      @include nb-magic-reset();
+      border-color: nb-theme(toggle-magic-disabled-border-color);
+    }
+  }
 }
 
 @mixin nb-toggle-status($status) {

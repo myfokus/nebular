@@ -1,4 +1,5 @@
 @use '../../styles/theming' as *;
+@use 'select-magic';
 @use '../form-field/form-field.component.theme' as form-field-theme;
 
 @mixin select-filled {
@@ -58,4 +59,6 @@
       }
     }
   }
+
+  @include select-magic.select-filled-magic('nb-select');
 }

@@ -257,26 +257,28 @@ import { convertToBoolProperty, NbBooleanInput } from '../helpers';
  * toggle-control-disabled-text-color:
  */
 @Component({
-    selector: 'nb-toggle',
-    animations: [
-        trigger('position', [
-            state('right', style({ right: 0, left: '*' })),
-            state('left', style({ left: 0, right: '*' })),
-            transition(':enter', [animate(0)]),
-            transition('right <=> left', [animate('0.15s')]),
-        ]),
-    ],
-    template: `
+  selector: 'nb-toggle',
+  animations: [
+    trigger('position', [
+      state('right', style({ right: 0, left: '*' })),
+      state('left', style({ left: 0, right: '*' })),
+      transition(':enter', [animate(0)]),
+      transition('right <=> left', [animate('0.15s')]),
+    ]),
+  ],
+  template: `
     <label class="toggle-label">
-      <input type="checkbox"
-             class="native-input visually-hidden"
-             role="switch"
-             [attr.aria-checked]="checked"
-             [disabled]="disabled"
-             [checked]="checked"
-             (change)="updateValue($event)"
-             (blur)="onTouched()"
-             (click)="onInputClick($event)">
+      <input
+        type="checkbox"
+        class="native-input visually-hidden"
+        role="switch"
+        [attr.aria-checked]="checked"
+        [disabled]="disabled"
+        [checked]="checked"
+        (change)="updateValue($event)"
+        (blur)="onTouched()"
+        (click)="onInputClick($event)"
+      />
       <div class="toggle" [class.checked]="checked">
         <span [@position]="checkState()" class="toggle-switcher">
           <nb-icon *ngIf="checked" icon="checkmark-bold-outline" pack="nebular-essentials"></nb-icon>
@@ -287,19 +289,20 @@ import { convertToBoolProperty, NbBooleanInput } from '../helpers';
       </span>
     </label>
   `,
-    styleUrls: [`./toggle.component.scss`],
-    providers: [{
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => NbToggleComponent),
-            multi: true,
-        }],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  styleUrls: [`./toggle.component.scss`],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => NbToggleComponent),
+      multi: true,
+    },
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class NbToggleComponent implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor {
-
-  onChange: any = () => { };
-  onTouched: any = () => { };
+  onChange: any = () => {};
+  onTouched: any = () => {};
 
   private destroy$ = new Subject<void>();
 
@@ -383,6 +386,11 @@ export class NbToggleComponent implements OnInit, AfterViewInit, OnDestroy, Cont
     return this.status === 'control';
   }
 
+  @HostBinding('class.status-magic')
+  get magic() {
+    return this.status === 'magic';
+  }
+
   @HostBinding('class')
   get additionalClasses(): string[] {
     if (this.statusService.isCustomStatus(this.status)) {
@@ -421,16 +429,19 @@ export class NbToggleComponent implements OnInit, AfterViewInit, OnDestroy, Cont
   ) {}
 
   ngOnInit(): void {
-    this.layoutDirection.onDirectionChange()
+    this.layoutDirection
+      .onDirectionChange()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.changeDetector.detectChanges());
   }
 
   ngAfterViewInit() {
     // TODO: #2254
-    this.zone.runOutsideAngular(() => setTimeout(() => {
-      this.renderer.addClass(this.hostElement.nativeElement, 'nb-transition');
-    }));
+    this.zone.runOutsideAngular(() =>
+      setTimeout(() => {
+        this.renderer.addClass(this.hostElement.nativeElement, 'nb-transition');
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -465,7 +476,7 @@ export class NbToggleComponent implements OnInit, AfterViewInit, OnDestroy, Cont
   }
 
   updateValue(event: Event): void {
-    const input = (event.target as HTMLInputElement);
+    const input = event.target as HTMLInputElement;
     this.checked = input.checked;
     this.checkedChange.emit(this.checked);
     this.onChange(this.checked);

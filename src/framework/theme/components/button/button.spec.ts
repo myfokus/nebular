@@ -9,13 +9,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NbThemeModule, NbButtonModule, NbButtonComponent } from '@nebular/theme';
 
 describe('Component: NbButton', () => {
-
   let button: NbButtonComponent;
   let fixture: ComponentFixture<NbButtonComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ NbThemeModule.forRoot(), NbButtonModule ],
+      imports: [NbThemeModule.forRoot(), NbButtonModule],
     });
 
     fixture = TestBed.createComponent(NbButtonComponent);
@@ -26,6 +25,12 @@ describe('Component: NbButton', () => {
     button.status = 'danger';
     fixture.detectChanges();
     expect(fixture.nativeElement.classList).toContain('status-danger');
+  });
+
+  it('should set class magic', () => {
+    button.status = 'magic';
+    fixture.detectChanges();
+    expect(fixture.nativeElement.classList).toContain('status-magic');
   });
 
   it('should set size small', () => {

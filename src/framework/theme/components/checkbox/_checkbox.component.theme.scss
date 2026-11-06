@@ -53,6 +53,68 @@
   @each $status in nb-get-statuses() {
     @include nb-checkbox-status($status);
   }
+
+  nb-checkbox.status-magic {
+    $base: nb-theme(checkbox-magic-base-color);
+
+    .custom-checkbox {
+      @include nb-magic-border(nb-theme(checkbox-magic-border-image), nb-theme(checkbox-magic-background-color), $base);
+    }
+
+    .custom-checkbox.checked,
+    .custom-checkbox.indeterminate {
+      @include nb-magic-surface(nb-theme(checkbox-magic-checked-background-image));
+    }
+
+    .native-input:enabled:focus + .custom-checkbox {
+      @include nb-magic-border(
+        nb-theme(checkbox-magic-focus-border-image),
+        nb-theme(checkbox-magic-focus-background-color),
+        $base
+      );
+
+      &.indeterminate,
+      &.checked {
+        @include nb-magic-surface(nb-theme(checkbox-magic-focus-checked-background-image));
+      }
+    }
+
+    .custom-checkbox:hover {
+      @include nb-magic-border(
+        nb-theme(checkbox-magic-hover-border-image),
+        nb-theme(checkbox-magic-hover-background-color),
+        $base
+      );
+
+      &.indeterminate,
+      &.checked {
+        @include nb-magic-surface(nb-theme(checkbox-magic-hover-checked-background-image));
+      }
+    }
+
+    .native-input:enabled:active + .custom-checkbox {
+      @include nb-magic-border(
+        nb-theme(checkbox-magic-active-border-image),
+        nb-theme(checkbox-magic-active-background-color),
+        $base
+      );
+
+      &.indeterminate,
+      &.checked {
+        @include nb-magic-surface(nb-theme(checkbox-magic-active-checked-background-image));
+      }
+    }
+
+    .native-input:disabled + .custom-checkbox {
+      @include nb-magic-reset();
+      border-color: nb-theme(checkbox-magic-disabled-border-color);
+
+      &.indeterminate,
+      &.checked {
+        border-color: nb-theme(checkbox-magic-disabled-checked-border-color);
+      }
+    }
+  }
 }
 
 @mixin nb-checkbox-status($status: '') {

@@ -9,6 +9,8 @@
 @forward 'core/mixins';
 @forward 'core/functions';
 @forward 'core/variants';
+@forward 'core/magic';
 @forward 'core/theming/register' show nb-register-theme;
 @forward 'core/theming/install';
 @forward 'core/theming/get-value';
+@forward 'core/theming/gradient' show nb-linear-gradient;

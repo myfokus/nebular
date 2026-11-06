@@ -154,4 +154,10 @@
       color: nb-theme(text-#{$status}-color);
     }
   }
+
+  .caption.status-magic,
+  .caption-2.status-magic,
+  .text-magic {
+    @include nb-magic-text(nb-theme(magic-text-gradient), $decoration-color: nb-theme(text-magic-color));
+  }
 }

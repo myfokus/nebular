@@ -1,0 +1,95 @@
+/**
+ * @license
+ * Copyright Akveo. All Rights Reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ */
+
+@use '../../styles/theming' as *;
+
+// The magic status of nb-select and nb-select-with-autocomplete, which share the select-* theme keys.
+
+@mixin select-outline-magic($host) {
+  #{$host}.appearance-outline.status-magic .select-button {
+    @include nb-magic-border(
+      nb-theme(select-outline-magic-border-image),
+      nb-theme(select-outline-magic-background-color)
+    );
+
+    &:focus {
+      @include nb-magic-border(
+        nb-theme(select-outline-magic-focus-border-image),
+        nb-theme(select-outline-magic-focus-background-color)
+      );
+    }
+
+    &:hover {
+      @include nb-magic-border(
+        nb-theme(select-outline-magic-hover-border-image),
+        nb-theme(select-outline-magic-hover-background-color)
+      );
+    }
+
+    &:focus:hover {
+      @include nb-magic-border(
+        nb-theme(select-outline-magic-focus-and-hover-border-image),
+        nb-theme(select-outline-magic-focus-and-hover-background-color)
+      );
+    }
+
+    &[disabled] {
+      @include nb-magic-reset();
+      border-color: nb-theme(select-outline-magic-disabled-border-color);
+    }
+
+    // The open select keeps its gradient ring, the edge towards the option list included.
+    &.bottom,
+    &.top {
+      border-color: transparent;
+    }
+  }
+}
+
+@mixin select-filled-magic($host) {
+  #{$host}.appearance-filled.status-magic .select-button {
+    @include nb-magic-surface(nb-theme(select-filled-magic-background-image));
+
+    &:focus {
+      @include nb-magic-surface(nb-theme(select-filled-magic-focus-background-image));
+    }
+
+    &:hover {
+      @include nb-magic-surface(nb-theme(select-filled-magic-hover-background-image));
+    }
+
+    &:focus:hover {
+      @include nb-magic-surface(nb-theme(select-filled-magic-focus-and-hover-background-image));
+    }
+
+    &[disabled] {
+      @include nb-magic-reset();
+      border-color: nb-theme(select-filled-magic-disabled-border-color);
+    }
+  }
+}
+
+@mixin select-hero-magic($host) {
+  #{$host}.appearance-hero.status-magic .select-button {
+    background-image: nb-theme(select-hero-magic-background-image);
+
+    &:focus {
+      background-image: nb-theme(select-hero-magic-focus-background-image);
+    }
+
+    &:hover {
+      background-image: nb-theme(select-hero-magic-hover-background-image);
+    }
+
+    &:focus:hover {
+      background-image: nb-theme(select-hero-magic-focus-and-hover-background-image);
+    }
+
+    &[disabled] {
+      background-image: none;
+    }
+  }
+}

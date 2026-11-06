@@ -6,7 +6,6 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { NbIconModule, NbCheckboxModule, NbCheckboxComponent, NbThemeModule } from '@nebular/theme';
 
 describe('Component: NbCheckbox', () => {
-
   let checkbox: NbCheckboxComponent;
   let label: DebugElement;
   let fixture: ComponentFixture<NbCheckboxComponent>;
@@ -15,7 +14,7 @@ describe('Component: NbCheckbox', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ NbThemeModule.forRoot(), NbIconModule, NbCheckboxModule],
+      imports: [NbThemeModule.forRoot(), NbIconModule, NbCheckboxModule],
     });
 
     fixture = TestBed.createComponent(NbCheckboxComponent);
@@ -80,12 +79,16 @@ describe('Component: NbCheckbox', () => {
     expect(testContainerEl.classList.contains('status-info')).toBeTruthy();
   });
 
-  it('should not emit change event when input changed', () => {
+  it('Setting status to magic apply corresponding class to host element', () => {
+    checkbox.status = 'magic';
+    fixture.detectChanges();
+    expect(testContainerEl.classList.contains('status-magic')).toBeTruthy();
+  });
 
+  it('should not emit change event when input changed', () => {
     const spy = jasmine.createSpy('checkedChange subscriber');
 
-    checkbox.checkedChange
-      .subscribe(spy);
+    checkbox.checkedChange.subscribe(spy);
 
     checkbox.checked = true;
     fixture.detectChanges();
@@ -93,11 +96,9 @@ describe('Component: NbCheckbox', () => {
   });
 
   it('should emit change event when clicked', () => {
-
     const spy = jasmine.createSpy('checkedChange subscriber');
 
-    checkbox.checkedChange
-      .subscribe(spy);
+    checkbox.checkedChange.subscribe(spy);
 
     label.nativeElement.click();
 
@@ -152,15 +153,14 @@ describe('Component: NbCheckbox', () => {
 
 /** Test component with reactive forms */
 @Component({
-    template: `<nb-checkbox [formControl]="formControl"></nb-checkbox>`,
-    standalone: false
+  template: `<nb-checkbox [formControl]="formControl"></nb-checkbox>`,
+  standalone: false,
 })
 class CheckboxWithFormControlComponent {
   formControl = new FormControl();
 }
 
 describe('Component: NbCheckbox with form control', () => {
-
   let fixture: ComponentFixture<CheckboxWithFormControlComponent>;
   let checkboxComponent: DebugElement;
   let checkboxInstance: NbCheckboxComponent;
@@ -173,33 +173,29 @@ describe('Component: NbCheckbox with form control', () => {
       declarations: [NbCheckboxComponent, CheckboxWithFormControlComponent],
     });
 
-      fixture = TestBed.createComponent(CheckboxWithFormControlComponent);
-      fixture.detectChanges();
+    fixture = TestBed.createComponent(CheckboxWithFormControlComponent);
+    fixture.detectChanges();
 
-      checkboxComponent = fixture.debugElement.query(
-        By.directive(NbCheckboxComponent),
-      );
-      checkboxInstance = checkboxComponent.componentInstance;
-      testComponent = fixture.debugElement.componentInstance;
-      inputElement = <HTMLInputElement>(
-        checkboxComponent.nativeElement.querySelector('input')
-      );
+    checkboxComponent = fixture.debugElement.query(By.directive(NbCheckboxComponent));
+    checkboxInstance = checkboxComponent.componentInstance;
+    testComponent = fixture.debugElement.componentInstance;
+    inputElement = <HTMLInputElement>checkboxComponent.nativeElement.querySelector('input');
   });
 
   it('Toggling form control disabled state properly toggles checkbox input', () => {
-      expect(checkboxInstance.disabled).toBeFalsy();
+    expect(checkboxInstance.disabled).toBeFalsy();
 
-      testComponent.formControl.disable();
-      fixture.detectChanges();
+    testComponent.formControl.disable();
+    fixture.detectChanges();
 
-      expect(checkboxInstance.disabled).toBeTruthy();
-      expect(inputElement.disabled).toBeTruthy();
+    expect(checkboxInstance.disabled).toBeTruthy();
+    expect(inputElement.disabled).toBeTruthy();
 
-      testComponent.formControl.enable();
-      fixture.detectChanges();
+    testComponent.formControl.enable();
+    fixture.detectChanges();
 
-      expect(checkboxInstance.disabled).toBeFalsy();
-      expect(inputElement.disabled).toBeFalsy();
+    expect(checkboxInstance.disabled).toBeFalsy();
+    expect(inputElement.disabled).toBeFalsy();
   });
 
   it('should mark touched on blur', () => {

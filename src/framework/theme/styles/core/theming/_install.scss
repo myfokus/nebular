@@ -8,6 +8,7 @@
 @use 'sass:meta';
 @use '../../theming-variables';
 @use 'get-value';
+@use 'gradient';
 @use 'register';
 
 @mixin nb-for-theme($name) {
@@ -38,11 +39,24 @@
   }
 }
 
+@function nb-css-gradient-stop($theme, $stop) {
+  @if (meta.type-of($stop) == 'string' and map.get($theme, $stop)) {
+    @return var(--#{$stop});
+  }
+  @return $stop;
+}
+
 @mixin nb-install-css-properties($theme-name, $theme) {
   .nb-theme-#{$theme-name} {
     @each $var, $value in $theme {
       @if (meta.type-of($value) == 'string' and map.get($theme, $value)) {
         --#{$var}: var(--#{$value});
+      } @else if (gradient.nb-is-gradient($value)) {
+        --#{$var}: #{gradient.nb-gradient-css(
+            gradient.nb-gradient-part($value, angle),
+            nb-css-gradient-stop($theme, gradient.nb-gradient-part($value, start)),
+            nb-css-gradient-stop($theme, gradient.nb-gradient-part($value, end))
+          )};
       } @else {
         --#{$var}: #{$value};
       }

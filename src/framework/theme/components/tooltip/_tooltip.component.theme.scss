@@ -59,5 +59,15 @@
     @each $status in nb-get-statuses() {
       @include nb-tooltip-status($status);
     }
+
+    &.status-magic {
+      background-image: nb-theme(tooltip-magic-background-image);
+      background-origin: border-box;
+      border-color: transparent;
+
+      .arrow {
+        background-image: nb-theme(tooltip-magic-background-image);
+      }
+    }
   }
 }

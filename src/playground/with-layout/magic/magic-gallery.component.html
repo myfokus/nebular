@@ -1,0 +1,550 @@
+<nav class="npg-magic-nav">
+  <a routerLink="." [queryParams]="{ section: null }" queryParamsHandling="merge">Alle</a>
+  @for (name of sections; track name) {
+  <a routerLink="." [queryParams]="{ section: name }" queryParamsHandling="merge">{{ name }}</a>
+  }
+</nav>
+
+@if (show('button')) {
+<nb-card class="npg-magic-section" data-section="button">
+  <nb-card-header>Button</nb-card-header>
+  <nb-card-body>
+    @for (appearance of buttonAppearances; track appearance) {
+    <h6>{{ appearance }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        @for (state of states; track state) {
+        <th>{{ state }}</th>
+        }
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (state of states; track state) {
+        <td [class]="stateClass(state)">
+          <button nbButton [appearance]="appearance" [status]="status" [disabled]="state === 'disabled'">
+            <nb-icon icon="paper-plane-outline"></nb-icon>
+            Sofi fragen
+          </button>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    <table class="npg-magic-grid">
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (size of sizes; track size) {
+        <td>
+          <button nbButton [appearance]="appearance" [status]="status" [size]="size">{{ size }}</button>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('button-group')) {
+<nb-card class="npg-magic-section" data-section="button-group">
+  <nb-card-header>Button group</nb-card-header>
+  <nb-card-body>
+    @for (appearance of groupAppearances; track appearance) {
+    <h6>{{ appearance }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        @for (state of states; track state) {
+        <th>{{ state }}</th>
+        }
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (state of states; track state) {
+        <td [class]="stateClass(state)">
+          <nb-button-group [appearance]="appearance" [status]="status" [disabled]="state === 'disabled'">
+            <button nbButtonToggle [pressed]="true">Tag</button>
+            <button nbButtonToggle>Woche</button>
+            <button nbButtonToggle>Monat</button>
+          </nb-button-group>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('card')) {
+<nb-card class="npg-magic-section" data-section="card">
+  <nb-card-header>Card</nb-card-header>
+  <nb-card-body class="npg-magic-row">
+    @for (status of statuses; track status) {
+    <nb-card [status]="status" class="npg-magic-card">
+      <nb-card-header>status="{{ status }}"</nb-card-header>
+      <nb-card-body>Vorschlag von Sofi für die Pflegeplanung.</nb-card-body>
+    </nb-card>
+    <nb-card [accent]="status" class="npg-magic-card">
+      <nb-card-header>accent="{{ status }}"</nb-card-header>
+      <nb-card-body>Vorschlag von Sofi für die Pflegeplanung.</nb-card-body>
+    </nb-card>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('badge')) {
+<nb-card class="npg-magic-section" data-section="badge">
+  <nb-card-header>Badge</nb-card-header>
+  <nb-card-body class="npg-magic-row">
+    @for (status of statuses; track status) {
+    <span class="npg-magic-badge-host">
+      {{ status }}
+      <nb-badge text="KI" [status]="status" position="top right"></nb-badge>
+    </span>
+    <span class="npg-magic-badge-host">
+      {{ status }} dot
+      <nb-badge [dotMode]="true" [status]="status" position="top right"></nb-badge>
+    </span>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('tag')) {
+<nb-card class="npg-magic-section" data-section="tag">
+  <nb-card-header>Tag</nb-card-header>
+  <nb-card-body>
+    @for (appearance of tagAppearances; track appearance) {
+    <h6>{{ appearance }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        <th>rest</th>
+        <th>hover</th>
+        <th>active</th>
+        <th>selected</th>
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        <td>
+          <nb-tag-list><nb-tag [appearance]="appearance" [status]="status" text="Sofi"></nb-tag></nb-tag-list>
+        </td>
+        <td class="npg-force-hover">
+          <nb-tag-list><nb-tag [appearance]="appearance" [status]="status" text="Sofi"></nb-tag></nb-tag-list>
+        </td>
+        <td>
+          <nb-tag-list>
+            <nb-tag #activeTag [appearance]="appearance" [status]="status" text="Sofi"></nb-tag>
+          </nb-tag-list>
+        </td>
+        <td>
+          <nb-tag-list>
+            <nb-tag [appearance]="appearance" [status]="status" [selected]="true" text="Sofi"></nb-tag>
+          </nb-tag-list>
+        </td>
+      </tr>
+      }
+    </table>
+    }
+    <h6>tag list with input</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        <th>rest</th>
+        <th>focus</th>
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        <td>
+          <nb-tag-list>
+            <nb-tag [status]="status" text="Schmerz"></nb-tag>
+            <input type="text" nbTagInput [status]="status" placeholder="Stichwort" />
+          </nb-tag-list>
+        </td>
+        <td>
+          <nb-tag-list #focusedTagList>
+            <nb-tag [status]="status" text="Schmerz"></nb-tag>
+            <input type="text" nbTagInput [status]="status" placeholder="Stichwort" />
+          </nb-tag-list>
+        </td>
+      </tr>
+      }
+    </table>
+  </nb-card-body>
+</nb-card>
+} @if (show('alert')) {
+<nb-card class="npg-magic-section" data-section="alert">
+  <nb-card-header>Alert</nb-card-header>
+  <nb-card-body class="npg-magic-columns">
+    @for (status of statuses; track status) {
+    <div>
+      <nb-alert [status]="status">status="{{ status }}" – <a href="#">Vorschlag ansehen</a></nb-alert>
+      <nb-alert [accent]="status">accent="{{ status }}"</nb-alert>
+      <nb-alert [outline]="status">outline="{{ status }}"</nb-alert>
+    </div>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('toast')) {
+<nb-card class="npg-magic-section npg-magic-overlay-space" data-section="toast">
+  <nb-card-header>Toast</nb-card-header>
+  <nb-card-body>The toasts are in the top right corner: rest, then hover with destroyByClick.</nb-card-body>
+</nb-card>
+} @if (show('tooltip')) {
+<nb-card class="npg-magic-section" data-section="tooltip">
+  <nb-card-header>Tooltip</nb-card-header>
+  <nb-card-body class="npg-magic-row npg-magic-tooltip-space">
+    @for (status of statuses; track status) {
+    <button
+      nbButton
+      appearance="ghost"
+      nbTooltip="Von Sofi erstellt"
+      [nbTooltipTrigger]="noop"
+      [nbTooltipStatus]="status"
+    >
+      {{ status }} top
+    </button>
+    <button
+      nbButton
+      appearance="ghost"
+      nbTooltip="Von Sofi erstellt"
+      [nbTooltipTrigger]="noop"
+      nbTooltipPlacement="bottom"
+      nbTooltipIcon="file-text-outline"
+      [nbTooltipStatus]="status"
+    >
+      {{ status }} bottom, icon
+    </button>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('input')) {
+<nb-card class="npg-magic-section" data-section="input">
+  <nb-card-header>Input</nb-card-header>
+  <nb-card-body>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        <th>rest</th>
+        <th>hover</th>
+        <th>focus</th>
+        <th>focus + hover</th>
+        <th>disabled</th>
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        <td><input nbInput [status]="status" placeholder="Platzhalter" /></td>
+        <td class="npg-force-hover"><input nbInput [status]="status" value="Text" /></td>
+        <td class="npg-force-focus"><input nbInput [status]="status" value="Text" /></td>
+        <td class="npg-force-focus npg-force-hover"><input nbInput [status]="status" value="Text" /></td>
+        <td><input nbInput [status]="status" value="Text" disabled /></td>
+      </tr>
+      }
+    </table>
+    <table class="npg-magic-grid">
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (size of sizes; track size) {
+        <td><input nbInput [status]="status" [fieldSize]="size" [placeholder]="size" /></td>
+        }
+      </tr>
+      }
+    </table>
+  </nb-card-body>
+</nb-card>
+} @if (show('form-field')) {
+<nb-card class="npg-magic-section" data-section="form-field">
+  <nb-card-header>Form field</nb-card-header>
+  <nb-card-body>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        <th>rest</th>
+        <th>focus (highlighted addons)</th>
+        <th>disabled</th>
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        <td>
+          <nb-form-field>
+            <nb-icon nbPrefix icon="file-text-outline"></nb-icon>
+            <input nbInput [status]="status" placeholder="Bericht" />
+            <span nbSuffix>KI</span>
+          </nb-form-field>
+        </td>
+        <td class="npg-force-focus">
+          <nb-form-field>
+            <nb-icon nbPrefix icon="file-text-outline"></nb-icon>
+            <input #focusedInput nbInput [status]="status" placeholder="Bericht" />
+            <span nbSuffix>KI</span>
+          </nb-form-field>
+        </td>
+        <td>
+          <nb-form-field>
+            <nb-icon nbPrefix icon="file-text-outline"></nb-icon>
+            <input nbInput [status]="status" placeholder="Bericht" disabled />
+            <span nbSuffix>KI</span>
+          </nb-form-field>
+        </td>
+      </tr>
+      }
+    </table>
+  </nb-card-body>
+</nb-card>
+} @if (show('select')) {
+<nb-card class="npg-magic-section" data-section="select">
+  <nb-card-header>Select</nb-card-header>
+  <nb-card-body>
+    @for (appearance of selectAppearances; track appearance) {
+    <h6>{{ appearance }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        <th>rest</th>
+        <th>hover</th>
+        <th>focus</th>
+        <th>disabled</th>
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (state of ['rest', 'hover', 'focus', 'disabled']; track state) {
+        <td [class]="stateClass($any(state))">
+          <nb-select
+            [appearance]="appearance"
+            [status]="status"
+            [disabled]="state === 'disabled'"
+            placeholder="Aktion"
+            [selected]="options[0]"
+          >
+            @for (option of options; track option) {
+            <nb-option [value]="option">{{ option }}</nb-option>
+            }
+          </nb-select>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('select-with-autocomplete')) {
+<nb-card class="npg-magic-section" data-section="select-with-autocomplete">
+  <nb-card-header>Select with autocomplete</nb-card-header>
+  <nb-card-body>
+    @for (appearance of selectAppearances; track appearance) {
+    <h6>{{ appearance }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        <th>rest</th>
+        <th>hover</th>
+        <th>focus</th>
+        <th>disabled</th>
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (state of ['rest', 'hover', 'focus', 'disabled']; track state) {
+        <td [class]="stateClass($any(state))">
+          <nb-select-with-autocomplete
+            [appearance]="appearance"
+            [status]="status"
+            [disabled]="state === 'disabled'"
+            placeholder="Aktion"
+            [selected]="options[0]"
+          >
+            @for (option of options; track option) {
+            <nb-option [value]="option">{{ option }}</nb-option>
+            }
+          </nb-select-with-autocomplete>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('checkbox')) {
+<nb-card class="npg-magic-section" data-section="checkbox">
+  <nb-card-header>Checkbox</nb-card-header>
+  <nb-card-body>
+    @for (value of ['unchecked', 'checked', 'indeterminate']; track value) {
+    <h6>{{ value }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        @for (state of states; track state) {
+        <th>{{ state }}</th>
+        }
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (state of states; track state) {
+        <td [class]="stateClass(state)">
+          <nb-checkbox
+            [status]="status"
+            [checked]="value === 'checked'"
+            [indeterminate]="value === 'indeterminate'"
+            [disabled]="state === 'disabled'"
+          >
+            Übernehmen
+          </nb-checkbox>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('radio')) {
+<nb-card class="npg-magic-section" data-section="radio">
+  <nb-card-header>Radio</nb-card-header>
+  <nb-card-body>
+    @for (value of ['unchecked', 'checked']; track value) {
+    <h6>{{ value }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        @for (state of states; track state) {
+        <th>{{ state }}</th>
+        }
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (state of states; track state) {
+        <td [class]="stateClass(state)">
+          <nb-radio-group
+            [name]="'radio-' + value + '-' + status + '-' + state"
+            [status]="status"
+            [disabled]="state === 'disabled'"
+            [value]="value === 'checked' ? 'a' : null"
+          >
+            <nb-radio value="a">Vorschlag</nb-radio>
+          </nb-radio-group>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('toggle')) {
+<nb-card class="npg-magic-section" data-section="toggle">
+  <nb-card-header>Toggle</nb-card-header>
+  <nb-card-body>
+    @for (value of ['unchecked', 'checked']; track value) {
+    <h6>{{ value }}</h6>
+    <table class="npg-magic-grid">
+      <tr>
+        <th></th>
+        @for (state of states; track state) {
+        <th>{{ state }}</th>
+        }
+      </tr>
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (state of states; track state) {
+        <td [class]="stateClass(state)">
+          <nb-toggle [status]="status" [checked]="value === 'checked'" [disabled]="state === 'disabled'">
+            Sofi
+          </nb-toggle>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('progress-bar')) {
+<nb-card class="npg-magic-section" data-section="progress-bar">
+  <nb-card-header>Progress bar</nb-card-header>
+  <nb-card-body>
+    <table class="npg-magic-grid npg-magic-wide">
+      @for (status of statuses; track status) { @for (size of sizes; track size) {
+      <tr>
+        <th>{{ status }} {{ size }}</th>
+        <td><nb-progress-bar [value]="65" [status]="status" [size]="size" [displayValue]="true"></nb-progress-bar></td>
+      </tr>
+      } }
+    </table>
+  </nb-card-body>
+</nb-card>
+} @if (show('spinner')) {
+<nb-card class="npg-magic-section" data-section="spinner">
+  <nb-card-header>Spinner</nb-card-header>
+  <nb-card-body>
+    <table class="npg-magic-grid">
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (size of sizes; track size) {
+        <td>
+          <div class="npg-magic-spinner-box" [nbSpinnerStatus]="status" [nbSpinnerSize]="size" [nbSpinner]="true"></div>
+        </td>
+        }
+      </tr>
+      }
+    </table>
+  </nb-card-body>
+</nb-card>
+} @if (show('icon')) {
+<nb-card class="npg-magic-section" data-section="icon">
+  <nb-card-header>Icon</nb-card-header>
+  <nb-card-body>
+    <table class="npg-magic-grid npg-magic-icons">
+      @for (status of statuses; track status) {
+      <tr>
+        <th>{{ status }}</th>
+        @for (icon of ['paper-plane-outline', 'file-text-outline', 'checkmark-outline', 'alert-triangle-outline',
+        'email-outline']; track icon) {
+        <td><nb-icon [icon]="icon" [status]="status"></nb-icon></td>
+        }
+      </tr>
+      }
+    </table>
+  </nb-card-body>
+</nb-card>
+} @if (show('chat')) {
+<nb-card class="npg-magic-section" data-section="chat">
+  <nb-card-header>Chat</nb-card-header>
+  <nb-card-body class="npg-magic-row">
+    @for (status of statuses; track status) {
+    <nb-chat [title]="'Sofi · ' + status" [status]="status" size="small" class="npg-magic-chat">
+      @for (message of messages; track message.text) {
+      <nb-chat-message [message]="message.text" [reply]="message.reply" [sender]="message.sender"></nb-chat-message>
+      }
+      <nb-chat-form></nb-chat-form>
+    </nb-chat>
+    }
+  </nb-card-body>
+</nb-card>
+} @if (show('typography')) {
+<nb-card class="npg-magic-section" data-section="typography">
+  <nb-card-header>Typography</nb-card-header>
+  <nb-card-body class="npg-magic-columns">
+    @for (status of statuses; track status) {
+    <div>
+      <p class="text-{{ status }}">.text-{{ status }}: Von Sofi zusammengefasst</p>
+      <p class="caption status-{{ status }}">.caption.status-{{ status }}: Von Sofi zusammengefasst</p>
+      <p>
+        <a href="#" class="text-{{ status }}">Link .text-{{ status }}</a>
+      </p>
+    </div>
+    }
+  </nb-card-body>
+</nb-card>
+}
