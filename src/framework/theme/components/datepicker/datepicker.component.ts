@@ -497,7 +497,9 @@ export class NbBasePickerComponent<D, T, P> extends NbBasePicker<D, T, P> implem
    * */
   readonly showWeekNumber = input(false, { transform: convertToBoolProperty });
 
-  readonly firstDayOfWeek = input<number | undefined>();
+  // Typed explicitly: the library compiles without strictNullChecks, so the inferred type would be emitted as
+  // InputSignal<number> and clash with the abstract declaration in NbBasePicker for strict consumers.
+  readonly firstDayOfWeek: InputSignal<number | undefined> = input<number | undefined>();
 
   /**
    * Determines picker overlay offset (in pixels).

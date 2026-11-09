@@ -109,48 +109,6 @@
             ],
             "scripts": []
           }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
-          }
-        },
-        "serve-ssr": {
-          "builder": "@nguniversal/builders:ssr-dev-server",
-          "configurations": {
-            "development": {
-              "browserTarget": "packages-smoke:build:development",
-              "serverTarget": "packages-smoke:server:development"
-            },
-            "production": {
-              "browserTarget": "packages-smoke:build:production",
-              "serverTarget": "packages-smoke:server:production"
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "prerender": {
-          "builder": "@nguniversal/builders:prerender",
-          "options": {
-            "routes": [
-              "/"
-            ]
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "packages-smoke:build:production",
-              "serverTarget": "packages-smoke:server:production"
-            },
-            "development": {
-              "browserTarget": "packages-smoke:build:development",
-              "serverTarget": "packages-smoke:server:development"
-            }
-          },
-          "defaultConfiguration": "production"
         }
       }
     },
@@ -173,18 +131,7 @@
       }
     }
   },
-  "cli": {
-    "schematicCollections": [
-      "@angular-eslint/schematics"
-    ]
-  },
   "schematics": {
-    "@angular-eslint/schematics:application": {
-      "setParserOptionsProject": true
-    },
-    "@angular-eslint/schematics:library": {
-      "setParserOptionsProject": true
-    },
     "@schematics/angular:component": {
       "type": "component"
     },

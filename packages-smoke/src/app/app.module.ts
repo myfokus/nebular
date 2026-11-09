@@ -3,12 +3,9 @@ import { BrowserModule, REMOVE_STYLES_ON_COMPONENT_DESTROY } from '@angular/plat
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NbThemeModule } from '@nebular/theme';
-import { NbAuthModule } from '@nebular/auth';
-import { NbSecurityModule } from '@nebular/security';
-import { NbMomentDateModule } from '@nebular/moment';
-import { NbDateFnsDateModule } from '@nebular/date-fns';
-import { NbEvaIconsModule } from '@nebular/eva-icons';
+import { NbThemeModule } from '@myfokus/nebular-theme';
+import { NbDateFnsDateModule } from '@myfokus/nebular-date-fns';
+import { NbEvaIconsModule } from '@myfokus/nebular-eva-icons';
 
 @NgModule({
   declarations: [AppComponent],
@@ -16,9 +13,6 @@ import { NbEvaIconsModule } from '@nebular/eva-icons';
     BrowserModule,
     BrowserAnimationsModule,
     NbThemeModule.forRoot({ name: 'default' }),
-    NbAuthModule.forRoot(),
-    NbSecurityModule.forRoot(),
-    NbMomentDateModule,
     NbDateFnsDateModule,
     NbEvaIconsModule,
   ],
