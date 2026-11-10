@@ -44,6 +44,15 @@ release, already targeted Angular 22 and so predates this rule.
   The build-tooling configs (`tools/gulp`, `tools/dev-schematics`, `theme/tsconfig.schematics.json`)
   pin the pre-6.0 behaviour explicitly rather than have the tooling rewritten. The root `tsconfig.json`
   drops `baseUrl` outright, so its `paths` entries had to become relative (`./src/...`).
+- `ng-packagr` is held at `~22.1.1`. 22.2 replaced rollup with rolldown for the FESM bundles, which
+  rewrites the published JavaScript; moving to it is a deliberate upgrade of its own, not a side effect.
+- `sass` is a declared devDependency pinned to `1.101.0`. `build:myfokus-sass` calls the `sass` binary,
+  which used to be available only because a transitive copy happened to be hoisted; the pin also keeps
+  the prebuilt theme CSS byte-identical (later 1.101.x serialize some colours differently).
+- `overrides` lift transitive dependencies out of vulnerable ranges their parents pin: `minimatch`
+  (→ 11, no backported fix), `@grpc/grpc-js` (Firestore pins `~1.9`; only the unbuilt `firebase-auth`
+  uses it), and `async` / `form-data` (under the unmaintained docs tooling). `packages-smoke` overrides
+  `form-data` and `qs` under Protractor the same way.
 
 ### Package identity
 
