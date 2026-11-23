@@ -44,15 +44,26 @@ release, already targeted Angular 22 and so predates this rule.
   The build-tooling configs (`tools/gulp`, `tools/dev-schematics`, `theme/tsconfig.schematics.json`)
   pin the pre-6.0 behaviour explicitly rather than have the tooling rewritten. The root `tsconfig.json`
   drops `baseUrl` outright, so its `paths` entries had to become relative (`./src/...`).
-- `ng-packagr` is held at `~22.1.1`. 22.2 replaced rollup with rolldown for the FESM bundles, which
-  rewrites the published JavaScript; moving to it is a deliberate upgrade of its own, not a side effect.
-- `sass` is a declared devDependency pinned to `1.101.0`. `build:myfokus-sass` calls the `sass` binary,
-  which used to be available only because a transitive copy happened to be hoisted; the pin also keeps
-  the prebuilt theme CSS byte-identical (later 1.101.x serialize some colours differently).
+- `ng-packagr` is on `~22.3.0`, which bundles the FESM output with rolldown instead of rollup. The
+  published JavaScript is laid out differently (`var X = class X`, no JSDoc in the bundle), with the
+  same exports and imports; the typings keep their docs.
+- `sass` is a declared devDependency pinned to an exact version. `build:myfokus-sass` calls the `sass`
+  binary, which used to be available only because a transitive copy happened to be hoisted; the pin
+  keeps the prebuilt theme CSS from changing unnoticed. Before moving it, diff `dist/` against a build
+  of the old version — some 1.101.x releases serialize colours differently.
+- `jasmine-core`, `karma-jasmine` and `karma-jasmine-html-reporter` are held at 3.10 / 4 / 1.7. Under
+  jasmine 4 and later, six window-scroll specs of the theme suite (`NbScrollService`,
+  `NbScrollDirective`, `NbListPageTrackerDirective`) fail because the test page itself scrolls.
+- Protractor and the `e2e` projects are gone: Angular 22 removed the protractor builder, so they could
+  no longer run.
+- The build tooling declares what it requires (`through2`, `fancy-log`, `lodash`) instead of relying on
+  copies gulp 4 happened to hoist.
 - `overrides` lift transitive dependencies out of vulnerable ranges their parents pin: `minimatch`
   (→ 11, no backported fix), `@grpc/grpc-js` (Firestore pins `~1.9`; only the unbuilt `firebase-auth`
-  uses it), and `async` / `form-data` (under the unmaintained docs tooling). `packages-smoke` overrides
-  `form-data` and `qs` under Protractor the same way.
+  uses it), and `form-data` (under `request`, which the docs site's `docsearch.js` pulls in).
+- `npm audit` still reports the docs site's tooling: `typedoc` 0.12 (with `marked` and `highlight.js`)
+  and `docsearch.js` (with `request`). Neither has a fix short of a rewrite, and neither is built or
+  published; `npm run docs:prepare` already fails on the theme's Sass.
 
 ### Package identity
 
@@ -404,7 +415,7 @@ sweep they no longer get.
 
 ---
 
-# Nebular [<img src="https://i.imgur.com/oMcxwZ0.png" alt="Eva Design System" height="20px" />](https://eva.design?utm_campaign=eva_design%20-%20home%20-%20nebular%20github%20readme&utm_source=nebular&utm_medium=referral&utm_content=github_readme_hero_pic) [![npm](https://img.shields.io/npm/l/@nebular/theme.svg)]() [![npm](https://img.shields.io/npm/dt/@nebular/theme.svg)](https://www.npmjs.com/package/@nebular/theme) [![Codecov](https://img.shields.io/codecov/c/github/akveo/nebular/master.svg?style=flat-square)](https://codecov.io/gh/akveo/nebular/branch/master)
+# Nebular [<img src="https://i.imgur.com/oMcxwZ0.png" alt="Eva Design System" height="20px" />](https://eva.design?utm_campaign=eva_design%20-%20home%20-%20nebular%20github%20readme&utm_source=nebular&utm_medium=referral&utm_content=github_readme_hero_pic) [![npm](https://img.shields.io/npm/l/@nebular/theme.svg)](<>) [![npm](https://img.shields.io/npm/dt/@nebular/theme.svg)](https://www.npmjs.com/package/@nebular/theme) [![Codecov](https://img.shields.io/codecov/c/github/akveo/nebular/master.svg?style=flat-square)](https://codecov.io/gh/akveo/nebular/branch/master)
 
 > Everything below this line is upstream's original README, kept for reference.
 
