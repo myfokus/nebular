@@ -4,7 +4,6 @@
 /.ng_compiled
 /.ng_build
 .lib
-docs/assets/examples/*
 
 # dependencies
 node_modules
@@ -34,17 +33,9 @@ node_modules
 npm-debug.log
 testem.log
 /typings
-/docs/framework
-/docs/docs.json
-/docs/output.json
-/docs/assets/examples
-/docs/dist
 /packages-smoke/dist
 .eslintcache
 
-# e2e
-/e2e/*.js
-/e2e/*.map
 
 #System Files
 .DS_Store
